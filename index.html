@@ -133,6 +133,8 @@
   .btn-dash:hover{background:var(--preto2);}
   .btn-csv{background:#fff;color:var(--soft);border:1px solid var(--line);}
   .btn-csv:hover{border-color:#d7dbe0;color:var(--ink);}
+  .btn-pdf{background:#fff;color:#c0392b;border:1px solid #f0c9c4;}
+  .btn-pdf:hover{background:#fdeeec;}
   .chips{padding:13px 22px;display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid var(--line2);}
   .chips .lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;align-self:center;margin-right:3px;}
   .chip-filter{font-size:11.5px;background:var(--verde-soft);border:1px solid #c7eed2;color:var(--verde2);padding:4px 11px;border-radius:16px;font-weight:600;}
@@ -328,7 +330,7 @@
   </aside>
 
   <main>
-    <div class="demo-note">Base real da <b>Receita Federal</b>. Teste atual: <b>SP, empresas ativas</b>. Clique em um card para ver os detalhes completos. Contagens muito grandes são aproximadas.</div>
+    <div class="demo-note">Base real da <b>Receita Federal</b><span id="baseInfo"></span>. Atual: <b>SP, empresas ativas</b>. Clique em um card para ver os detalhes completos. Contagens muito grandes são aproximadas.</div>
     <div class="err-note" id="errNote"></div>
     <div class="card">
       <div class="saved-top"><h3>🗂️ Buscas Salvas</h3><input id="savedSearch" placeholder="Procurar busca salva..." oninput="renderSaved()"></div>
@@ -345,6 +347,7 @@
           <div class="view-toggle"><button class="vt on" id="vtCards" onclick="setView('cards')">Cards</button><button class="vt" id="vtTable" onclick="setView('table')">Tabela</button></div>
           <button class="btn btn-sm btn-excel" onclick="exportar('xlsx')">⬇ Excel</button>
           <button class="btn btn-sm btn-dash" onclick="exportar('html')">📊 Dashboard HTML</button>
+          <button class="btn btn-sm btn-pdf" onclick="exportar('pdf')">📄 PDF</button>
           <button class="btn btn-sm btn-csv" onclick="exportar('csv')">CSV</button>
         </div>
       </div>
@@ -385,7 +388,7 @@ let viewMode='cards', filtrosAplicados=null, buscaJaFeita=false;
 let offset=0, totalCount=null, currentQS='', loading=false, lastBatch=0, totalEhAprox=false;
 let BUSCAS=[], CNAES=[], cnaeSel=new Set(), refsCnaeOk=false, refsMunOk=false, modalRow=null, LOGO='';
 const supaAuth = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
-let usuario=null;
+let usuario=null, accessToken=null, nuvemOk=false;
 function $(id){return document.getElementById(id);}
 function gateShow(){$('gate').style.display='flex';}
 function gateHide(){$('gate').style.display='none';}
@@ -395,14 +398,14 @@ async function gateLogin(){
   if(!supaAuth){msg.textContent='Login indisponível (sem conexão).';return;}
   if(!email||!senha){msg.textContent='Informe e-mail e senha.';return;}
   btn.disabled=true;btn.textContent='Entrando...';
-  try{const{data,error}=await supaAuth.auth.signInWithPassword({email,password:senha});if(error)throw error;usuario=data.user;gateHide();hdrUser();iniciar();}
+  try{const{data,error}=await supaAuth.auth.signInWithPassword({email,password:senha});if(error)throw error;usuario=data.user;accessToken=(data.session&&data.session.access_token)||null;gateHide();hdrUser();iniciar();}
   catch(e){msg.textContent='❌ '+(((e.message||'').indexOf('Invalid login')>=0)?'E-mail ou senha incorretos.':(e.message||'falha'));}
   finally{btn.disabled=false;btn.textContent='Entrar';}
 }
-async function logout(){if(supaAuth){try{await supaAuth.auth.signOut();}catch(e){}}usuario=null;hdrUser();gateShow();}
+async function logout(){if(supaAuth){try{await supaAuth.auth.signOut();}catch(e){}}usuario=null;accessToken=null;nuvemOk=false;hdrUser();gateShow();}
 async function initAuth(){
   if(!supaAuth){gateHide();iniciar();return;}
-  try{const{data}=await supaAuth.auth.getSession();usuario=(data&&data.session)?data.session.user:null;}catch(e){usuario=null;}
+  try{const{data}=await supaAuth.auth.getSession();usuario=(data&&data.session)?data.session.user:null;accessToken=(data&&data.session)?data.session.access_token:null;}catch(e){usuario=null;}
   hdrUser();usuario?(gateHide(),iniciar()):gateShow();
 }
 function toggleAcc(h){h.parentElement.classList.toggle('open');}
@@ -412,6 +415,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','
 function norm(s){return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().trim();}
 function brl(v){return (v==null?0:Number(v)).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});}
 function dataBR(s){if(!s)return '—';const p=String(s).slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s;}
+function dataHora(s){if(!s)return '';try{return new Date(s).toLocaleString('pt-BR');}catch(e){return dataBR(s);}}
 function fmtCnpj(d){d=String(d||'').padStart(14,'0');return d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8,12)+'-'+d.slice(12);}
 function nfmt(n){return Number(n).toLocaleString('pt-BR');}
 async function carregarReferencias(){
@@ -420,6 +424,10 @@ async function carregarReferencias(){
   else{$('cnaeSearch').style.display='none';$('cnaeList').style.display='none';$('cnaeChips').style.display='none';$('fCnaeTxt').style.display='block';$('cnaeSub').textContent='Digite código ou ramo';}
   try{const uf=$('fUf').value||'SP';const r=await fetch(SUPA_URL+'/rest/v1/municipios?select=municipio&uf=eq.'+uf+'&order=municipio',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){const sel=$('fMunicipio');d.forEach(m=>{const o=document.createElement('option');o.value=m.municipio;o.textContent=m.municipio;sel.appendChild(o);});refsMunOk=true;}}}catch(e){}
   if(!refsMunOk){$('fMunicipio').style.display='none';$('fMunicipioTxt').style.display='block';$('munHint').textContent='Digite o começo do nome da cidade.';}
+  try{const r=await fetch(SUPA_URL+'/rest/v1/situacoes?select=situacao,qtde&order=qtde.desc',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){const sel=$('fSituacao');sel.innerHTML='<option value="">Todas</option>';d.forEach(s=>{const o=document.createElement('option');o.value=s.situacao;o.textContent=s.situacao+' ('+nfmt(s.qtde)+')';sel.appendChild(o);});}}}catch(e){}
+}
+async function carregarMeta(){
+  try{const r=await fetch(SUPA_URL+'/rest/v1/meta?select=chave,valor',{headers:{'apikey':SUPA_KEY}});if(!r.ok)return;const d=await r.json(),m={};d.forEach(x=>m[x.chave]=x.valor);const el=$('baseInfo');if(el&&m.base_data)el.innerHTML=' · atualizada em <b>'+dataBR(m.base_data)+'</b>'+(m.total?' ('+nfmt(parseInt(m.total))+' empresas)':'');}catch(e){}
 }
 function renderCnaeList(){
   if(!refsCnaeOk)return;const q=norm($('cnaeSearch').value||''),box=$('cnaeList');box.innerHTML='';let n=0;
@@ -520,6 +528,7 @@ async function exportar(fmt){
   const data=new Date().toLocaleString('pt-BR');
   const arq='leads-maximos-'+new Date().toISOString().slice(0,10).replace(/-/g,'');
   if(fmt==='html'){return exportarDashboard(rows,data,arq);}
+  if(fmt==='pdf'){return exportarPDF(rows,data);}
   const head=['CNPJ','Razão Social','Nome Fantasia','Município','UF','CNAE','Descrição CNAE','Situação','Tipo','Porte','Simples','MEI','Capital Social','Data Abertura','Telefone','E-mail'];
   const body=rows.map(e=>[fmtCnpj(e.cnpj),e.razao_social,e.nome_fantasia,e.municipio,e.uf,e.cnae_principal,e.cnae_desc,e.situacao,e.tipo,e.porte,e.simples?'Sim':'Não',e.mei?'Sim':'Não',e.capital_social,dataBR(e.data_abertura),e.telefone,e.email]);
   if(fmt==='xlsx'&&window.XLSX){const ws=XLSX.utils.aoa_to_sheet([head,...body]);ws['!cols']=[20,32,26,18,5,12,32,9,8,8,7,5,15,12,16,26].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads');XLSX.writeFile(wb,arq+'.xlsx');}
@@ -529,12 +538,24 @@ async function exportar(fmt){
 function baixar(conteudo,nome,tipo){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([conteudo],{type:tipo+';charset=utf-8'}));a.download=nome;a.click();}
 function contar(rows,campo){const m={};rows.forEach(r=>{const k=r[campo]||'—';m[k]=(m[k]||0)+1;});return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
 function exportarDashboard(rows,data,arq){
+  baixar(gerarDashboardHtml(rows,data,false),arq+'-dashboard.html','text/html');
+  toast('📊 Dashboard de '+nfmt(rows.length)+' empresa(s) gerado!');
+}
+function exportarPDF(rows,data){
+  const html=gerarDashboardHtml(rows,data,true);
+  let w=null;try{w=window.open('','_blank');}catch(e){}
+  if(!w){baixar(html,'leads-maximos-dashboard.html','text/html');toast('⚠️ Permita pop-ups p/ gerar PDF. Baixei o relatório — abra e use Ctrl+P → Salvar como PDF.');return;}
+  w.document.open();w.document.write(html);w.document.close();
+  toast('📄 Use "Salvar como PDF" na janela que abriu ('+nfmt(rows.length)+' empresas).');
+}
+function gerarDashboardHtml(rows,data,autoPrint){
   const n=rows.length, top=arr=>arr.slice(0,6);
   const porPorte=contar(rows,'porte'), porSit=contar(rows,'situacao'), porMun=contar(rows,'municipio'), porCnae=contar(rows,'cnae_desc');
   const comTel=rows.filter(r=>r.telefone&&r.telefone.trim()).length, comEmail=rows.filter(r=>r.email&&r.email.trim()).length;
   const capMedio=rows.reduce((s,r)=>s+(Number(r.capital_social)||0),0)/(n||1);
   const chips=resumoChips(filtrosAplicados).map(c=>'<span class="c">'+esc(c)+'</span>').join('');
   const kpi=(v,l)=>'<div class="kpi"><div class="kv">'+v+'</div><div class="kl">'+l+'</div></div>';
+  const autoScript=autoPrint?'<script>addEventListener("load",function(){setTimeout(function(){print()},500)})<\/script>':'';
   const barRows=(arr,tot)=>top(arr).map(([k,v])=>'<div class="bar"><div class="bl">'+esc(k)+'</div><div class="bt"><div class="bf" style="width:'+Math.max(4,Math.round(v/tot*100))+'%"></div></div><div class="bv">'+nfmt(v)+'</div></div>').join('');
   const linhas=rows.slice(0,2000).map(e=>'<tr><td>'+fmtCnpj(e.cnpj)+'</td><td><b>'+esc(e.razao_social)+'</b><br><span class="mut">'+esc(e.nome_fantasia||'')+'</span></td><td>'+esc(e.municipio)+'/'+esc(e.uf)+'</td><td>'+esc(e.cnae_principal)+'<br><span class="mut">'+esc(e.cnae_desc)+'</span></td><td>'+esc(e.porte)+'</td><td>'+brl(e.capital_social)+'</td><td>'+esc(e.telefone||'—')+'</td><td>'+esc(e.email||'—')+'</td></tr>').join('');
   const logoTag = LOGO ? '<img src="'+LOGO+'" style="height:40px;border-radius:8px">' : '<div style="font-weight:800;font-size:22px;letter-spacing:1px">MAXIMOS</div>';
@@ -551,7 +572,10 @@ function exportarDashboard(rows,data,arq){
   '.box{background:#fff;border:1px solid #ebedf0;border-radius:14px;padding:18px}.box h3{font-size:13px;margin:0 0 14px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280}'+
   '.bar{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12.5px}.bl{width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt{flex:1;background:#f1f3f5;border-radius:6px;height:9px;overflow:hidden}.bf{height:9px;background:#27c24c;border-radius:6px}.bv{width:54px;text-align:right;font-weight:700;color:#1ea33e}'+
   '.box.full{margin-bottom:22px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#fafbfc;text-align:left;padding:10px;color:#6b7280;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #ebedf0}td{padding:10px;border-bottom:1px solid #f1f3f5;vertical-align:top}.mut{color:#8b929b}'+
-  '.ft{text-align:center;color:#8b929b;font-size:11.5px;padding:18px}</style></head><body>'+
+  '.ft{text-align:center;color:#8b929b;font-size:11.5px;padding:18px}'+
+  '.pdfbtn{position:fixed;top:16px;right:18px;z-index:99;background:#27c24c;color:#fff;border:none;padding:11px 17px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.2);font-family:inherit}'+
+  '@media print{.pdfbtn{display:none!important}.box,.kpi,tr{break-inside:avoid}body{background:#fff}}</style></head><body>'+
+  '<button class="pdfbtn" onclick="window.print()">🖨️ Salvar como PDF</button>'+
   '<div class="hd">'+logoTag+'<div class="t">Relatório de Prospecção · <b>base CNPJ (Receita Federal)</b></div></div>'+
   '<div class="wrap"><h1>Relatório de Prospecção de Leads</h1><div class="sub">Gerado em '+data+' · MAXIMOS Soluções Empresariais</div>'+
   '<div class="chips">'+chips+'</div>'+
@@ -559,17 +583,41 @@ function exportarDashboard(rows,data,arq){
   '<div class="cols"><div class="box"><h3>Top municípios</h3>'+barRows(porMun,n)+'</div><div class="box"><h3>Top ramos (CNAE)</h3>'+barRows(porCnae,n)+'</div></div>'+
   '<div class="cols"><div class="box"><h3>Por porte</h3>'+barRows(porPorte,n)+'</div><div class="box"><h3>Por situação</h3>'+barRows(porSit,n)+'</div></div>'+
   '<div class="box full"><h3>Empresas'+(n>2000?' (primeiras 2.000 — lista completa no Excel)':'')+'</h3><table><thead><tr><th>CNPJ</th><th>Empresa</th><th>Cidade</th><th>CNAE</th><th>Porte</th><th>Capital</th><th>Telefone</th><th>E-mail</th></tr></thead><tbody>'+linhas+'</tbody></table></div>'+
-  '<div class="ft">MAXIMOS Soluções Empresariais · dados da Receita Federal</div></div></body></html>';
-  baixar(html,arq+'-dashboard.html','text/html');
-  toast('📊 Dashboard de '+nfmt(n)+' empresa(s) gerado!');
+  '<div class="ft">MAXIMOS Soluções Empresariais · dados da Receita Federal</div></div>'+autoScript+'</body></html>';
+  return html;
 }
 const LS='maximos_buscas_v2';
-function loadBuscas(){try{BUSCAS=JSON.parse(localStorage.getItem(LS)||'[]');}catch(e){BUSCAS=[];}}
+const BREST=SUPA_URL+'/rest/v1/buscas_salvas';
+function authH(extra){const h={'apikey':SUPA_KEY,'Authorization':'Bearer '+accessToken};if(extra)Object.assign(h,extra);return h;}
+async function loadBuscas(){
+  nuvemOk=false;
+  if(accessToken){
+    try{const r=await fetch(BREST+'?select=*&order=criado_em.desc',{headers:authH()});
+      if(r.ok){const d=await r.json();BUSCAS=d.map(b=>({id:b.id,nome:b.nome,pasta:b.pasta||'Sem pasta',data:dataHora(b.criado_em),filtros:b.filtros||{},resumo:resumoChips(b.filtros||{})}));nuvemOk=true;return;}}catch(e){}
+  }
+  try{BUSCAS=JSON.parse(localStorage.getItem(LS)||'[]');}catch(e){BUSCAS=[];}
+}
 function persist(){try{localStorage.setItem(LS,JSON.stringify(BUSCAS));}catch(e){}}
 function nid(){return 'b'+Math.random().toString(36).slice(2,9);}
-function salvarBusca(){const nome=($('saveName').value||'').trim();if(!nome){toast('⚠️ Dê um nome para a busca.');return;}const pasta=($('saveFolder').value||'').trim()||'Sem pasta',f=getFiltros();BUSCAS.unshift({id:nid(),nome,pasta,data:new Date().toLocaleString('pt-BR'),filtros:f,resumo:resumoChips(f)});persist();renderSaved();renderFolders();$('saveName').value='';toast('💾 Busca salva.');}
+async function salvarBusca(){
+  const nome=($('saveName').value||'').trim();if(!nome){toast('⚠️ Dê um nome para a busca.');return;}
+  const pasta=($('saveFolder').value||'').trim()||'Sem pasta',f=getFiltros();
+  if(nuvemOk&&accessToken){
+    try{const r=await fetch(BREST,{method:'POST',headers:authH({'Content-Type':'application/json'}),body:JSON.stringify({nome,pasta,filtros:f})});
+      if(r.ok){await loadBuscas();renderSaved();renderFolders();$('saveName').value='';toast('☁️ Busca salva na nuvem.');return;}}catch(e){}
+    toast('⚠️ Falha na nuvem — salvei neste navegador.');
+  }
+  BUSCAS.unshift({id:nid(),nome,pasta,data:new Date().toLocaleString('pt-BR'),filtros:f,resumo:resumoChips(f)});persist();renderSaved();renderFolders();$('saveName').value='';toast('💾 Busca salva.');
+}
 function aplicarBusca(id){const b=BUSCAS.find(x=>x.id===id);if(!b)return;setFiltros(b.filtros);filtrar();window.scrollTo({top:0,behavior:'smooth'});toast('🔄 Busca aplicada.');}
-function excluirBusca(id){const b=BUSCAS.find(x=>x.id===id);if(!b||!confirm('Excluir “'+b.nome+'”?'))return;BUSCAS=BUSCAS.filter(x=>x.id!==id);persist();renderSaved();renderFolders();}
+async function excluirBusca(id){
+  const b=BUSCAS.find(x=>x.id===id);if(!b||!confirm('Excluir “'+b.nome+'”?'))return;
+  if(nuvemOk&&accessToken){
+    try{const r=await fetch(BREST+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:authH()});
+      if(r.ok){await loadBuscas();renderSaved();renderFolders();return;}}catch(e){}
+  }
+  BUSCAS=BUSCAS.filter(x=>x.id!==id);persist();renderSaved();renderFolders();
+}
 function renderFolders(){const dl=$('folderList');dl.innerHTML='';[...new Set(BUSCAS.map(b=>b.pasta))].forEach(p=>{const o=document.createElement('option');o.value=p;dl.appendChild(o);});}
 function renderSaved(){const q=($('savedSearch').value||'').toLowerCase(),body=$('savedBody');body.innerHTML='';const list=BUSCAS.filter(b=>!q||b.nome.toLowerCase().includes(q)||b.pasta.toLowerCase().includes(q));if(!list.length){body.innerHTML='<div class="saved-empty">'+(BUSCAS.length?'Nenhuma corresponde.':'Nenhuma busca salva ainda. Monte os filtros e clique em “Salvar busca”.')+'</div>';return;}[...new Set(list.map(b=>b.pasta))].forEach(p=>{const g=document.createElement('div');g.innerHTML='<div class="folder-name">📁 '+esc(p)+'</div>';list.filter(b=>b.pasta===p).forEach(b=>{const it=document.createElement('div');it.className='saved-item';it.innerHTML='<div class="si-main"><div class="si-name">'+esc(b.nome)+'</div><div class="si-date">'+b.data+'</div><div class="si-chips">'+b.resumo.map(c=>'<span class="mini-chip">'+esc(c)+'</span>').join('')+'</div></div><div class="si-actions"><button class="btn btn-mini btn-apply-mini" onclick="aplicarBusca(\''+b.id+'\')">Aplicar</button><button class="btn btn-mini btn-del" onclick="excluirBusca(\''+b.id+'\')">🗑</button></div>';g.appendChild(it);});body.appendChild(g);});}
 function limpar(){['fBusca','fCnpj','fCapMin','fCapMax','fAbreDe','fAbreAte','fSituacao','fTipo','fSimples','fMei','fPorte'].forEach(id=>$(id).value='');$('fUf').value='SP';if(refsMunOk)$('fMunicipio').value='';else $('fMunicipioTxt').value='';if(refsCnaeOk){cnaeSel.clear();renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value='';$('cnaeSearch').value='';if(semContadores)toggleContadores();filtrar();}
@@ -577,7 +625,7 @@ let jaIniciou=false;
 async function iniciar(){
   if(jaIniciou)return;jaIniciou=true;
   fetch('logo-maximos.jpg').then(r=>r.blob()).then(b=>{const fr=new FileReader();fr.onload=()=>LOGO=fr.result;fr.readAsDataURL(b);}).catch(()=>{});
-  loadBuscas();renderFolders();renderSaved();
+  await loadBuscas();renderFolders();renderSaved();carregarMeta();
   await carregarReferencias();
   filtrar();
 }
