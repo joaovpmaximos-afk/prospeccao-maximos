@@ -574,7 +574,7 @@ function gerarDashboardHtml(rows,data,autoPrint){
   '.box.full{margin-bottom:22px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#fafbfc;text-align:left;padding:10px;color:#6b7280;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #ebedf0}td{padding:10px;border-bottom:1px solid #f1f3f5;vertical-align:top}.mut{color:#8b929b}'+
   '.ft{text-align:center;color:#8b929b;font-size:11.5px;padding:18px}'+
   '.pdfbtn{position:fixed;top:16px;right:18px;z-index:99;background:#27c24c;color:#fff;border:none;padding:11px 17px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.2);font-family:inherit}'+
-  '@media print{.pdfbtn{display:none!important}.box,.kpi,tr{break-inside:avoid}body{background:#fff}}</style></head><body>'+
+  '@media print{.pdfbtn{display:none!important}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@page{margin:10mm}body{background:#fff}.box,.kpi,tr{break-inside:avoid}thead{display:table-header-group}.cols{grid-template-columns:1fr 1fr}.hd{border-radius:0}}</style></head><body>'+
   '<button class="pdfbtn" onclick="window.print()">🖨️ Salvar como PDF</button>'+
   '<div class="hd">'+logoTag+'<div class="t">Relatório de Prospecção · <b>base CNPJ (Receita Federal)</b></div></div>'+
   '<div class="wrap"><h1>Relatório de Prospecção de Leads</h1><div class="sub">Gerado em '+data+' · MAXIMOS Soluções Empresariais</div>'+
