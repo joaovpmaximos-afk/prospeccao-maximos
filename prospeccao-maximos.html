@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prospecção de Leads — MAXIMOS Soluções Empresariais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --surface:#ffffff; --ink:#15191e; --muted:#8b929b; --soft:#6b7280;
+    --line:#ebedf0; --line2:#f1f3f5;
+    --verde:#27c24c; --verde2:#1ea33e; --verde-soft:#eafaef;
+    --preto:#0f1419; --preto2:#1a2027;
+    --radius:16px; --radius-sm:11px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter','Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+  ::selection{background:var(--verde);color:#fff;}
+  header{background:var(--preto);color:#fff;padding:0;position:sticky;top:0;z-index:50;}
+  .hdr{max-width:1340px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .logo{display:flex;align-items:center;gap:13px;}
+  .logo-img{height:42px;width:auto;display:block;border-radius:9px;}
+  .logo .txt b{font-size:19px;font-weight:800;letter-spacing:.5px;line-height:1;color:#fff;display:block;}
+  .logo .txt span{display:block;font-size:9px;letter-spacing:3.5px;color:#7f8893;margin-top:3px;font-weight:500;}
+  .hdr-right{display:flex;align-items:center;gap:16px;}
+  .hdr .badge{font-size:11.5px;color:#aeb6c0;font-weight:500;}
+  .hdr .badge b{color:var(--verde);font-weight:700;}
+  #hdrUser{display:none;align-items:center;gap:9px;font-size:12.5px;color:#aeb6c0;}
+  #hdrUser a{color:#fff;cursor:pointer;text-decoration:none;background:#222a32;padding:6px 12px;border-radius:8px;font-weight:600;font-size:12px;}
+  #hdrUser a:hover{background:#2b343d;}
+  #gate{position:fixed;inset:0;z-index:3000;background:radial-gradient(120% 120% at 50% 0%,#1a2027,#0f1419);display:flex;align-items:center;justify-content:center;padding:20px;}
+  .gate-card{background:#fff;border-radius:20px;padding:38px 34px;max-width:380px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5);}
+  .gate-card .glogo{height:46px;margin-bottom:18px;border-radius:9px;}
+  .gate-card h1{font-size:19px;margin:6px 0 4px;font-weight:800;letter-spacing:-.2px;}
+  .gate-card>p{color:var(--muted);font-size:13px;margin:0 0 22px;}
+  .gate-form{display:flex;flex-direction:column;gap:10px;}
+  .gate-form input{padding:13px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;font-family:inherit;background:#fafbfc;}
+  .gate-form input:focus{outline:none;border-color:var(--verde);background:#fff;box-shadow:0 0 0 3px var(--verde-soft);}
+  #gateMsg{font-size:12.5px;color:#d33;min-height:16px;margin-top:10px;}
+  .gate-restrito{margin-top:20px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);padding-top:16px;}
+  .wrap{max-width:1340px;margin:0 auto;padding:22px;display:grid;grid-template-columns:344px 1fr;gap:22px;align-items:start;}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr;padding:16px;}}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;position:sticky;top:78px;max-height:calc(100vh - 96px);overflow-y:auto;}
+  .panel::-webkit-scrollbar{width:8px;}
+  .panel::-webkit-scrollbar-thumb{background:#e3e6ea;border-radius:8px;}
+  @media(max-width:980px){.panel{position:static;max-height:none;}}
+  .panel h2{font-size:13px;margin:0 0 16px;display:flex;align-items:center;gap:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--soft);}
+  .panel h2 svg{width:16px;height:16px;color:var(--verde);}
+  .field{margin-bottom:9px;}
+  .field input.search{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;font-size:13.5px;background:#fafbfc;font-family:inherit;}
+  .field input.search:focus{outline:none;border-color:var(--verde);background:#fff;box-shadow:0 0 0 3px var(--verde-soft);}
+  .toggle-card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin:8px 0 12px;cursor:pointer;transition:.15s;}
+  .toggle-card:hover{border-color:#d7dbe0;}
+  .toggle-card.on{border-color:var(--verde);background:var(--verde-soft);}
+  .toggle-card .tc-ico{width:34px;height:34px;border-radius:9px;background:#f1f3f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+  .toggle-card.on .tc-ico{background:var(--verde);}
+  .toggle-card .tc-txt b{display:block;font-size:13px;font-weight:600;}
+  .toggle-card .tc-txt small{color:var(--muted);font-size:11px;}
+  .toggle-card .tc-state{margin-left:auto;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#f1f3f5;color:var(--muted);}
+  .toggle-card.on .tc-state{background:var(--verde);color:#fff;}
+  .acc{border:1px solid var(--line);border-radius:12px;margin-bottom:9px;overflow:hidden;transition:.15s;}
+  .acc.open{border-color:#dfe3e8;}
+  .acc-head{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;user-select:none;}
+  .acc-head:hover{background:#fafbfc;}
+  .acc-head .ico{width:34px;height:34px;border-radius:9px;background:var(--verde-soft);color:var(--verde2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .acc-head .ico svg{width:17px;height:17px;}
+  .acc-head .htx{flex:1;min-width:0;}
+  .acc-head .htx b{display:block;font-size:13px;font-weight:600;}
+  .acc-head .htx small{color:var(--muted);font-size:11px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .acc-head .chev{transition:.2s;color:#c2c8cf;flex-shrink:0;}
+  .acc.open .acc-head .chev{transform:rotate(180deg);color:var(--verde2);}
+  .acc-body{display:none;padding:2px 14px 15px;}
+  .acc.open .acc-body{display:block;}
+  .acc-body label{display:block;font-size:11px;font-weight:600;color:var(--soft);margin:11px 0 5px;}
+  .acc-body select,.acc-body input{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;font-size:13.5px;background:#fafbfc;font-family:inherit;color:var(--ink);}
+  .acc-body select:focus,.acc-body input:focus{outline:none;border-color:var(--verde);background:#fff;box-shadow:0 0 0 3px var(--verde-soft);}
+  .hintline{font-size:10.5px;color:var(--muted);margin-top:5px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .badge-paid{font-size:9.5px;background:#fff7e6;color:#9a6b00;border:1px solid #f3e3b8;padding:2px 7px;border-radius:6px;font-weight:700;margin-left:6px;}
+  .chk-list{max-height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:4px;margin-top:6px;}
+  .chk-item{display:flex;align-items:flex-start;gap:9px;padding:8px;border-radius:8px;cursor:pointer;font-size:12.5px;}
+  .chk-item:hover{background:#fafbfc;}
+  .chk-item input{width:auto;margin-top:2px;}
+  .chk-item .cc{font-weight:700;color:var(--verde2);font-family:ui-monospace,monospace;font-size:11px;}
+  .chk-item .cq{color:var(--muted);font-size:10px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+  .chip{background:var(--verde);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:6px;}
+  .chip b{cursor:pointer;font-size:13px;line-height:1;opacity:.85;}
+  .apply-bar{display:flex;gap:8px;margin-top:8px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;border-radius:11px;padding:13px 18px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;}
+  .btn-apply{flex:1;background:var(--verde);color:#fff;}
+  .btn-apply:hover{background:var(--verde2);}
+  .btn-apply:disabled{opacity:.7;cursor:default;}
+  .btn-clear{background:#fff;color:var(--soft);border:1px solid var(--line);}
+  .btn-clear:hover{border-color:#d7dbe0;color:var(--ink);}
+  .save-box{margin-top:16px;border-top:1px solid var(--line2);padding-top:16px;}
+  .save-box .lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;}
+  .save-box input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;margin-bottom:8px;font-family:inherit;background:#fafbfc;}
+  .btn-save{width:100%;background:var(--preto);color:#fff;}
+  .btn-save:hover{background:var(--preto2);}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:22px;}
+  .saved-top{padding:16px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .saved-top h3{margin:0;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px;color:var(--soft);}
+  .saved-top input{margin-left:auto;padding:9px 13px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;min-width:200px;font-family:inherit;background:#fafbfc;}
+  .saved-body{padding:0 16px 14px;}
+  .folder-name{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:10px 6px 5px;}
+  .saved-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;}
+  .saved-item .si-main{flex:1;min-width:0;}
+  .saved-item .si-name{font-weight:700;font-size:13.5px;}
+  .saved-item .si-date{font-size:11px;color:var(--muted);margin-bottom:7px;}
+  .saved-item .si-chips{display:flex;flex-wrap:wrap;gap:5px;}
+  .mini-chip{font-size:10.5px;background:#f5f6f8;border:1px solid var(--line);color:var(--soft);padding:3px 9px;border-radius:14px;}
+  .saved-item .si-actions{display:flex;gap:6px;flex-shrink:0;}
+  .btn-mini{padding:8px 13px;font-size:12px;border-radius:9px;}
+  .btn-apply-mini{background:var(--verde);color:#fff;}
+  .btn-del{background:#fff;border:1px solid var(--line);color:#d33;padding:8px 11px;}
+  .saved-empty{color:var(--muted);font-size:12.5px;padding:16px 6px;}
+  .res-top{padding:22px;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line2);}
+  .res-kicker{font-size:10.5px;font-weight:700;color:var(--verde2);text-transform:uppercase;letter-spacing:1px;}
+  .count{font-size:34px;font-weight:800;line-height:1.05;margin:4px 0 3px;letter-spacing:-1px;}
+  .count em{font-style:normal;font-size:15px;font-weight:600;color:var(--muted);letter-spacing:0;}
+  .sub{font-size:12.5px;color:var(--muted);max-width:560px;}
+  .res-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .view-toggle{display:flex;background:#f1f3f5;border-radius:10px;padding:3px;}
+  .vt{background:transparent;border:none;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--soft);font-family:inherit;border-radius:8px;}
+  .vt.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .btn-sm{padding:10px 14px;font-size:12.5px;border-radius:10px;}
+  .btn-excel{background:var(--verde);color:#fff;}
+  .btn-excel:hover{background:var(--verde2);}
+  .btn-dash{background:var(--preto);color:#fff;}
+  .btn-dash:hover{background:var(--preto2);}
+  .btn-csv{background:#fff;color:var(--soft);border:1px solid var(--line);}
+  .btn-csv:hover{border-color:#d7dbe0;color:var(--ink);}
+  .btn-pdf{background:#fff;color:#c0392b;border:1px solid #f0c9c4;}
+  .btn-pdf:hover{background:#fdeeec;}
+  .chips{padding:13px 22px;display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid var(--line2);}
+  .chips .lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;align-self:center;margin-right:3px;}
+  .chip-filter{font-size:11.5px;background:var(--verde-soft);border:1px solid #c7eed2;color:var(--verde2);padding:4px 11px;border-radius:16px;font-weight:600;}
+  .selinfo{font-size:12px;color:var(--muted);padding:11px 22px;background:#fafbfc;border-bottom:1px solid var(--line2);}
+  .selinfo b{color:var(--verde2);}
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(296px,1fr));gap:14px;padding:20px 22px;}
+  .lead-card{border:1px solid var(--line);border-radius:14px;padding:16px;transition:.15s;cursor:pointer;background:#fff;}
+  .lead-card:hover{border-color:var(--verde);box-shadow:0 6px 20px rgba(39,194,76,.12);transform:translateY(-1px);}
+  .lead-card.sel{border-color:var(--verde);background:var(--verde-soft);}
+  .lc-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:5px;}
+  .lc-top input{margin-top:3px;}
+  .lc-name{font-weight:700;font-size:13.5px;line-height:1.25;flex:1;letter-spacing:-.2px;}
+  .lc-cnpj{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--soft);margin:0 0 10px 26px;font-weight:600;}
+  .lc-row{display:flex;align-items:center;gap:7px;font-size:12px;margin:5px 0;color:#525a63;}
+  .lc-row .i{width:14px;text-align:center;opacity:.55;}
+  .lc-cnae{font-size:11.5px;color:#525a63;margin:8px 0;line-height:1.4;}
+  .lc-cnae b{color:var(--verde2);font-family:ui-monospace,monospace;}
+  .lc-tags{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0 4px;}
+  .lc-foot{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);padding-top:9px;margin-top:9px;}
+  .lc-foot .ver{color:var(--verde2);font-weight:700;}
+  .st{font-size:10px;font-weight:700;padding:3px 9px;border-radius:14px;white-space:nowrap;}
+  .st.ativa{background:var(--verde-soft);color:var(--verde2);}
+  .st.baixada{background:#fdeaea;color:#d33;}
+  .st.suspensa{background:#fff4e0;color:#a06a00;}
+  .st.inapta{background:#eef0f2;color:#6b7280;}
+  .tag{font-size:10px;font-weight:600;padding:3px 9px;border-radius:14px;background:#f5f6f8;color:#525a63;border:1px solid var(--line);}
+  .tbl-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{position:sticky;top:0;background:#fafbfc;color:var(--soft);font-weight:600;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;padding:12px;text-align:left;white-space:nowrap;z-index:2;border-bottom:1px solid var(--line);}
+  tbody td{padding:12px;border-bottom:1px solid var(--line2);white-space:nowrap;}
+  tbody tr{cursor:pointer;}
+  tbody tr:hover{background:#fafbfc;}
+  td.cnpj{font-family:ui-monospace,monospace;font-size:12px;color:var(--soft);}
+  td.razao b{font-weight:700;}
+  td.razao small{display:block;color:var(--muted);font-size:11px;}
+  .tag-cnae{font-family:ui-monospace,monospace;color:var(--verde2);font-weight:700;}
+  input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--verde);}
+  .more{padding:18px;text-align:center;border-top:1px solid var(--line2);}
+  .btn-more{background:#fff;color:var(--verde2);border:1px solid var(--verde);padding:11px 24px;}
+  .btn-more:hover{background:var(--verde-soft);}
+  .empty{text-align:center;padding:64px 20px;color:var(--muted);}
+  .empty svg{width:50px;height:50px;color:#dce0e5;margin-bottom:12px;}
+  .demo-note{background:var(--verde-soft);border:1px solid #c7eed2;color:#176b30;font-size:12px;border-radius:12px;padding:12px 15px;margin:0 0 16px;line-height:1.5;}
+  .err-note{background:#fdeaea;border:1px solid #f3c0c0;color:#a02929;font-size:12.5px;border-radius:12px;padding:12px 15px;margin:0 0 16px;display:none;}
+  footer{text-align:center;color:var(--muted);font-size:11.5px;padding:24px;}
+  .spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
+  .spin.dark{border-color:var(--verde-soft);border-top-color:var(--verde2);}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--preto);color:#fff;padding:13px 22px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.3);z-index:4000;opacity:0;transition:.25s;pointer-events:none;}
+  .toast.show{opacity:1;bottom:34px;}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,20,25,.55);z-index:3500;display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-bg.show{display:flex;}
+  .modal-card{background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.4);}
+  .modal-head{background:var(--preto);color:#fff;padding:20px 24px;position:sticky;top:0;}
+  .modal-head .mh-fant{font-size:18px;font-weight:800;letter-spacing:-.3px;}
+  .modal-head .mh-razao{font-size:12.5px;color:#aeb6c0;margin-top:3px;}
+  .modal-head .mh-x{position:absolute;top:16px;right:18px;cursor:pointer;font-size:20px;color:#aeb6c0;line-height:1;}
+  .modal-head .mh-x:hover{color:#fff;}
+  .modal-body{padding:20px 24px;}
+  .mb-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;}
+  .mb-item{border-bottom:1px solid var(--line2);padding-bottom:9px;}
+  .mb-item .k{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;}
+  .mb-item .v{font-size:13.5px;margin-top:3px;word-break:break-word;}
+  .mb-item.full{grid-column:1/3;}
+  .mb-cnpj{font-family:ui-monospace,monospace;font-weight:700;}
+  .modal-foot{padding:16px 24px 22px;display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-copy{background:#f5f6f8;color:var(--soft);border:1px solid var(--line);}
+</style>
+</head>
+<body>
+<div id="gate">
+  <div class="gate-card">
+    <img class="glogo" src="logo-maximos.jpg" alt="MAXIMOS">
+    <h1>Prospecção de Leads</h1>
+    <p>Entre para acessar a base de empresas.</p>
+    <div class="gate-form">
+      <input id="gateEmail" type="email" placeholder="E-mail" onkeydown="if(event.key==='Enter')gateLogin()">
+      <input id="gateSenha" type="password" placeholder="Senha" onkeydown="if(event.key==='Enter')gateLogin()">
+      <button class="btn btn-apply" id="gateBtn" onclick="gateLogin()" style="width:100%;">Entrar</button>
+    </div>
+    <div id="gateMsg"></div>
+    <div class="gate-restrito">🔒 Acesso restrito · MAXIMOS Soluções Empresariais</div>
+  </div>
+</div>
+
+<header>
+  <div class="hdr">
+    <div class="logo">
+      <img class="logo-img" src="logo-maximos.jpg" alt="MAXIMOS">
+      <div class="txt"><b>MAXIMOS</b><span>SOLUÇÕES EMPRESARIAIS</span></div>
+    </div>
+    <div class="hdr-right">
+      <div id="hdrUser"></div>
+      <div class="badge">Prospecção B2B · <b>base CNPJ</b></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="panel">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filtros</h2>
+    <div class="field"><input class="search" id="fBusca" placeholder="Buscar razão social ou fantasia..."></div>
+    <div class="field"><input class="search" id="fCnpj" placeholder="Pesquisar por CNPJ (só números)..."></div>
+    <div class="toggle-card" id="tgContadores" onclick="toggleContadores()">
+      <div class="tc-ico">🛡️</div>
+      <div class="tc-txt"><b>Remover contadores</b><small>Exclui contábeis (CNAE 6920)</small></div>
+      <div class="tc-state" id="tgState">Inativo</div>
+    </div>
+    <div class="acc open" data-acc>
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="htx"><b>Localização</b><small>UF e Município</small></div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="acc-body">
+        <label>Estado (UF)</label>
+        <select id="fUf"><option value="SP">SP — São Paulo</option></select>
+        <label>Município</label>
+        <select id="fMunicipio"><option value="">Todos os municípios</option></select>
+        <input id="fMunicipioTxt" placeholder="Ex: Campinas..." style="display:none;">
+        <div class="hintline" id="munHint">Escolha a cidade na lista.</div>
+      </div>
+    </div>
+    <div class="acc" data-acc>
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <div class="htx"><b>Atividade (CNAE)</b><small id="cnaeSub">Selecione um ou mais ramos</small></div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="acc-body">
+        <input class="search" id="cnaeSearch" placeholder="Buscar ramo ou código..." oninput="renderCnaeList()" style="margin-top:8px;">
+        <div class="chk-list" id="cnaeList"></div>
+        <div class="chip-row" id="cnaeChips"></div>
+        <input id="fCnaeTxt" placeholder="Ex: 5611 ou restaurante" style="display:none;">
+      </div>
+    </div>
+    <div class="acc" data-acc>
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg></div>
+        <div class="htx"><b>Situação &amp; Tipo</b><small>Cadastral e Matriz/Filial</small></div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="acc-body">
+        <label>Situação cadastral</label>
+        <select id="fSituacao"><option value="">Todas</option><option value="Ativa">Ativa</option><option value="Baixada">Baixada</option><option value="Suspensa">Suspensa</option><option value="Inapta">Inapta</option></select>
+        <label>Tipo</label>
+        <select id="fTipo"><option value="">Matriz e Filial</option><option value="Matriz">Apenas Matriz</option><option value="Filial">Apenas Filial</option></select>
+      </div>
+    </div>
+    <div class="acc" data-acc>
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="htx"><b>Regime &amp; Porte</b><small>Simples, MEI e porte</small></div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="acc-body">
+        <div class="row2">
+          <div><label>Simples</label><select id="fSimples"><option value="">Todas</option><option value="sim">Optantes</option><option value="nao">Não optantes</option></select></div>
+          <div><label>MEI</label><select id="fMei"><option value="">Todas</option><option value="sim">MEI</option><option value="nao">Não MEI</option></select></div>
+        </div>
+        <label>Porte</label>
+        <select id="fPorte"><option value="">Todos</option><option value="MEI">MEI</option><option value="ME">Microempresa (ME)</option><option value="EPP">Pequeno (EPP)</option><option value="Demais">Demais</option></select>
+      </div>
+    </div>
+    <div class="acc" data-acc>
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div class="htx"><b>Capital, Data &amp; Porte físico</b><small>Capital, abertura, funcionários</small></div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="acc-body">
+        <label>Capital social (R$)</label>
+        <div class="row2"><input type="number" id="fCapMin" placeholder="Mínimo"><input type="number" id="fCapMax" placeholder="Máximo"></div>
+        <label>Data de abertura</label>
+        <div class="row2"><input type="date" id="fAbreDe"><input type="date" id="fAbreAte"></div>
+        <label>Nº de funcionários <span class="badge-paid">dado pago</span></label>
+        <select id="fFunc" disabled><option>Indisponível (base gratuita)</option></select>
+      </div>
+    </div>
+    <div class="apply-bar">
+      <button class="btn btn-clear" onclick="limpar()">Limpar</button>
+      <button class="btn btn-apply" id="btnApply" onclick="aplicar()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Aplicar Filtros
+      </button>
+    </div>
+    <div class="save-box">
+      <div class="lbl">Salvar esta busca</div>
+      <input id="saveName" placeholder="Nome (ex: Restaurantes Campinas)">
+      <input id="saveFolder" list="folderList" placeholder="Selecione ou crie uma pasta...">
+      <datalist id="folderList"></datalist>
+      <button class="btn btn-save" onclick="salvarBusca()">💾 Salvar busca</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="demo-note">Base real da <b>Receita Federal</b><span id="baseInfo"></span>. Atual: <b>SP, empresas ativas</b>. Clique em um card para ver os detalhes completos. Contagens muito grandes são aproximadas.</div>
+    <div class="err-note" id="errNote"></div>
+    <div class="card">
+      <div class="saved-top"><h3>🗂️ Buscas Salvas</h3><input id="savedSearch" placeholder="Procurar busca salva..." oninput="renderSaved()"></div>
+      <div class="saved-body" id="savedBody"></div>
+    </div>
+    <div class="card">
+      <div class="res-top">
+        <div>
+          <div class="res-kicker">Resultado Consolidado</div>
+          <div class="count"><span id="cnt">—</span> <em>empresas encontradas</em></div>
+          <div class="sub" id="cntSub">Carregando...</div>
+        </div>
+        <div class="res-actions">
+          <div class="view-toggle"><button class="vt on" id="vtCards" onclick="setView('cards')">Cards</button><button class="vt" id="vtTable" onclick="setView('table')">Tabela</button></div>
+          <button class="btn btn-sm btn-excel" onclick="exportar('xlsx')">⬇ Excel</button>
+          <button class="btn btn-sm btn-dash" onclick="exportar('html')">📊 Dashboard HTML</button>
+          <button class="btn btn-sm btn-pdf" onclick="exportar('pdf')">📄 PDF</button>
+          <button class="btn btn-sm btn-csv" onclick="exportar('csv')">CSV</button>
+        </div>
+      </div>
+      <div class="chips" id="filterChips" style="display:none;"></div>
+      <div class="selinfo" id="selInfo"></div>
+      <div id="cardsView" class="cards-grid"></div>
+      <div id="tableView" class="tbl-scroll" style="display:none;">
+        <table><thead><tr>
+          <th style="width:38px;"><input type="checkbox" id="chkAll" onclick="toggleAll(this)"></th>
+          <th>CNPJ</th><th>Razão social / Fantasia</th><th>Município / UF</th><th>CNAE</th><th>Situação</th><th>Porte</th><th>Capital</th><th>Abertura</th><th>Telefone</th><th>E-mail</th>
+        </tr></thead><tbody id="tbody"></tbody></table>
+      </div>
+      <div class="empty" id="emptyState"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div id="emptyMsg">Carregando dados reais...</div></div>
+      <div class="more" id="moreBox" style="display:none;"><button class="btn btn-more" id="btnMore" onclick="carregarMais()">Carregar mais 100</button></div>
+    </div>
+    <footer>MAXIMOS Soluções Empresariais · Prospecção de Leads · base CNPJ — Receita Federal</footer>
+  </main>
+</div>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)fecharModal()">
+  <div class="modal-card">
+    <div class="modal-head"><span class="mh-x" onclick="fecharModal()">✕</span><div class="mh-fant" id="mFant"></div><div class="mh-razao" id="mRazao"></div></div>
+    <div class="modal-body"><div class="mb-grid" id="mGrid"></div></div>
+    <div class="modal-foot"><button class="btn btn-sm btn-copy" onclick="copiarCnpj()">📋 Copiar CNPJ</button><button class="btn btn-sm btn-clear" onclick="fecharModal()">Fechar</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const SUPA_URL='https://crlirvufkbykywkxdqsa.supabase.co';
+const SUPA_KEY='sb_publishable_i9c0T5PfVKMOg1GlY_Qzdg_t06faOG0';
+const REST=SUPA_URL+'/rest/v1/empresas';
+const PAGE=100, EXPORT_CAP=20000;
+let resultados=[], selecionados=new Set(), semContadores=false;
+let viewMode='cards', filtrosAplicados=null, buscaJaFeita=false;
+let offset=0, totalCount=null, currentQS='', loading=false, lastBatch=0, totalEhAprox=false;
+let BUSCAS=[], CNAES=[], cnaeSel=new Set(), refsCnaeOk=false, refsMunOk=false, modalRow=null, LOGO='';
+const supaAuth = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+let usuario=null, accessToken=null, nuvemOk=false;
+function $(id){return document.getElementById(id);}
+function gateShow(){$('gate').style.display='flex';}
+function gateHide(){$('gate').style.display='none';}
+function hdrUser(){const el=$('hdrUser');if(usuario){el.style.display='flex';el.innerHTML='👤 '+esc(usuario.email||'')+' <a onclick="logout()">Sair</a>';}else{el.style.display='none';}}
+async function gateLogin(){
+  const email=($('gateEmail').value||'').trim(),senha=$('gateSenha').value||'',msg=$('gateMsg'),btn=$('gateBtn');
+  if(!supaAuth){msg.textContent='Login indisponível (sem conexão).';return;}
+  if(!email||!senha){msg.textContent='Informe e-mail e senha.';return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const{data,error}=await supaAuth.auth.signInWithPassword({email,password:senha});if(error)throw error;usuario=data.user;accessToken=(data.session&&data.session.access_token)||null;gateHide();hdrUser();iniciar();}
+  catch(e){msg.textContent='❌ '+(((e.message||'').indexOf('Invalid login')>=0)?'E-mail ou senha incorretos.':(e.message||'falha'));}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+async function logout(){if(supaAuth){try{await supaAuth.auth.signOut();}catch(e){}}usuario=null;accessToken=null;nuvemOk=false;hdrUser();gateShow();}
+async function initAuth(){
+  if(!supaAuth){gateHide();iniciar();return;}
+  try{const{data}=await supaAuth.auth.getSession();usuario=(data&&data.session)?data.session.user:null;accessToken=(data&&data.session)?data.session.access_token:null;}catch(e){usuario=null;}
+  hdrUser();usuario?(gateHide(),iniciar()):gateShow();
+}
+function toggleAcc(h){h.parentElement.classList.toggle('open');}
+function toggleContadores(){semContadores=!semContadores;$('tgContadores').classList.toggle('on',semContadores);$('tgState').textContent=semContadores?'Ativo':'Inativo';}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function norm(s){return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().trim();}
+function brl(v){return (v==null?0:Number(v)).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});}
+function dataBR(s){if(!s)return '—';const p=String(s).slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s;}
+function dataHora(s){if(!s)return '';try{return new Date(s).toLocaleString('pt-BR');}catch(e){return dataBR(s);}}
+function fmtCnpj(d){d=String(d||'').padStart(14,'0');return d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8,12)+'-'+d.slice(12);}
+function nfmt(n){return Number(n).toLocaleString('pt-BR');}
+async function carregarReferencias(){
+  try{const r=await fetch(SUPA_URL+'/rest/v1/cnaes?select=codigo,descricao,qtde&order=qtde.desc',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){CNAES=d.map(x=>[x.codigo,x.descricao,x.qtde]);refsCnaeOk=true;}}}catch(e){}
+  if(refsCnaeOk)renderCnaeList();
+  else{$('cnaeSearch').style.display='none';$('cnaeList').style.display='none';$('cnaeChips').style.display='none';$('fCnaeTxt').style.display='block';$('cnaeSub').textContent='Digite código ou ramo';}
+  try{const uf=$('fUf').value||'SP';const r=await fetch(SUPA_URL+'/rest/v1/municipios?select=municipio&uf=eq.'+uf+'&order=municipio',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){const sel=$('fMunicipio');d.forEach(m=>{const o=document.createElement('option');o.value=m.municipio;o.textContent=m.municipio;sel.appendChild(o);});refsMunOk=true;}}}catch(e){}
+  if(!refsMunOk){$('fMunicipio').style.display='none';$('fMunicipioTxt').style.display='block';$('munHint').textContent='Digite o começo do nome da cidade.';}
+  try{const r=await fetch(SUPA_URL+'/rest/v1/situacoes?select=situacao,qtde&order=qtde.desc',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){const sel=$('fSituacao');sel.innerHTML='<option value="">Todas</option>';d.forEach(s=>{const o=document.createElement('option');o.value=s.situacao;o.textContent=s.situacao+' ('+nfmt(s.qtde)+')';sel.appendChild(o);});}}}catch(e){}
+}
+async function carregarMeta(){
+  try{const r=await fetch(SUPA_URL+'/rest/v1/meta?select=chave,valor',{headers:{'apikey':SUPA_KEY}});if(!r.ok)return;const d=await r.json(),m={};d.forEach(x=>m[x.chave]=x.valor);const el=$('baseInfo');if(el&&m.base_data)el.innerHTML=' · atualizada em <b>'+dataBR(m.base_data)+'</b>'+(m.total?' ('+nfmt(parseInt(m.total))+' empresas)':'');}catch(e){}
+}
+function renderCnaeList(){
+  if(!refsCnaeOk)return;const q=norm($('cnaeSearch').value||''),box=$('cnaeList');box.innerHTML='';let n=0;
+  for(const c of CNAES){
+    if(q && !(c[0].includes(q)||norm(c[1]).includes(q)))continue;
+    if(++n>150){const d=document.createElement('div');d.className='hintline';d.style.padding='6px';d.textContent='...refine a busca para ver mais';box.appendChild(d);break;}
+    const div=document.createElement('div');div.className='chk-item';
+    div.innerHTML='<input type="checkbox" '+(cnaeSel.has(c[0])?'checked':'')+'><span><span class="cc">'+c[0]+'</span> <span class="cq">('+nfmt(c[2])+')</span><br>'+esc(c[1])+'</span>';
+    div.onclick=(e)=>{if(e.target.tagName!=='INPUT'){const cb=div.querySelector('input');cb.checked=!cb.checked;}cnaeToggle(c[0],div.querySelector('input').checked);};
+    box.appendChild(div);
+  }
+}
+function cnaeToggle(cod,on){on?cnaeSel.add(cod):cnaeSel.delete(cod);renderCnaeChips();}
+function renderCnaeChips(){const box=$('cnaeChips');box.innerHTML='';cnaeSel.forEach(cod=>{const chip=document.createElement('span');chip.className='chip';chip.innerHTML=cod+' <b>×</b>';chip.querySelector('b').onclick=()=>{cnaeSel.delete(cod);renderCnaeChips();renderCnaeList();};box.appendChild(chip);});$('cnaeSub').textContent=cnaeSel.size?cnaeSel.size+' selecionado(s)':'Selecione um ou mais ramos';}
+function getFiltros(){return{busca:($('fBusca').value||'').trim(),cnpj:($('fCnpj').value||'').replace(/\D/g,''),uf:$('fUf').value,municipio:refsMunOk?$('fMunicipio').value:($('fMunicipioTxt').value||'').trim(),cnae:refsCnaeOk?[...cnaeSel]:($('fCnaeTxt').value||'').trim(),situacao:$('fSituacao').value,tipo:$('fTipo').value,simples:$('fSimples').value,mei:$('fMei').value,porte:$('fPorte').value,capMin:$('fCapMin').value,capMax:$('fCapMax').value,abreDe:$('fAbreDe').value,abreAte:$('fAbreAte').value,semContadores};}
+function setFiltros(f){$('fBusca').value=f.busca||'';$('fCnpj').value=f.cnpj||'';$('fUf').value=f.uf||'SP';if(refsMunOk)$('fMunicipio').value=(typeof f.municipio==='string'?f.municipio:'')||'';else $('fMunicipioTxt').value=f.municipio||'';if(refsCnaeOk){cnaeSel=new Set(Array.isArray(f.cnae)?f.cnae:[]);renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value=(typeof f.cnae==='string'?f.cnae:'')||'';$('fSituacao').value=f.situacao||'';$('fTipo').value=f.tipo||'';$('fSimples').value=f.simples||'';$('fMei').value=f.mei||'';$('fPorte').value=f.porte||'';$('fCapMin').value=f.capMin||'';$('fCapMax').value=f.capMax||'';$('fAbreDe').value=f.abreDe||'';$('fAbreAte').value=f.abreAte||'';semContadores=!!f.semContadores;$('tgContadores').classList.toggle('on',semContadores);$('tgState').textContent=semContadores?'Ativo':'Inativo';}
+function buildQuery(f){
+  const p=[];
+  if(f.uf)p.push('uf=eq.'+encodeURIComponent(f.uf));
+  if(f.municipio){if(refsMunOk)p.push('municipio=eq.'+encodeURIComponent(f.municipio));else p.push('municipio=like.'+encodeURIComponent(norm(f.municipio))+'*');}
+  if(f.cnae&&f.cnae.length){if(Array.isArray(f.cnae))p.push('cnae_principal=in.('+f.cnae.join(',')+')');else if(/^[0-9]/.test(f.cnae))p.push('cnae_principal=like.'+f.cnae.replace(/\D/g,'')+'*');else p.push('cnae_desc=ilike.*'+encodeURIComponent(f.cnae)+'*');}
+  if(f.situacao)p.push('situacao=eq.'+encodeURIComponent(f.situacao));
+  if(f.tipo)p.push('tipo=eq.'+encodeURIComponent(f.tipo));
+  if(f.simples)p.push('simples=is.'+(f.simples==='sim'));
+  if(f.mei)p.push('mei=is.'+(f.mei==='sim'));
+  if(f.porte)p.push('porte=eq.'+encodeURIComponent(f.porte));
+  if(f.semContadores)p.push('cnae_principal=not.like.6920*');
+  if(f.capMin)p.push('capital_social=gte.'+parseFloat(f.capMin));
+  if(f.capMax)p.push('capital_social=lte.'+parseFloat(f.capMax));
+  if(f.abreDe)p.push('data_abertura=gte.'+f.abreDe);
+  if(f.abreAte)p.push('data_abertura=lte.'+f.abreAte);
+  if(f.busca){const b=encodeURIComponent(f.busca.replace(/[(),*]/g,' ').trim());p.push('or=(razao_social.ilike.*'+b+'*,nome_fantasia.ilike.*'+b+'*)');}
+  if(f.cnpj)p.push('cnpj=like.*'+f.cnpj+'*');
+  return p.join('&');
+}
+async function apiFetch(qs,from,to,withCount){
+  const headers={'apikey':SUPA_KEY,'Range-Unit':'items','Range':from+'-'+to};
+  if(withCount)headers['Prefer']='count=estimated';
+  const res=await fetch(REST+'?select=*&order=cnpj'+(qs?'&'+qs:''),{headers});
+  if(!res.ok)throw new Error('HTTP '+res.status+' — '+(await res.text()).slice(0,180));
+  const cr=res.headers.get('content-range')||'',tot=cr.split('/')[1];
+  return{data:await res.json(),total:(tot&&tot!=='*')?parseInt(tot):null};
+}
+function setLoading(on){loading=on;const b=$('btnApply');b.disabled=on;b.innerHTML=on?'<span class="spin"></span> Buscando...':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Aplicar Filtros';}
+function amigavel(m){return (m||'').includes('57014')?'A busca ficou ampla demais e o servidor demorou. Adicione um filtro (cidade, CNAE, porte) para afinar.':m;}
+function showError(m){const e=$('errNote');e.style.display='block';e.innerHTML='⚠️ '+esc(m);}
+function clearError(){$('errNote').style.display='none';}
+function aplicar(){if(!loading)filtrar();}
+async function filtrar(){
+  clearError();const f=getFiltros();filtrosAplicados=f;buscaJaFeita=true;
+  currentQS=buildQuery(f);offset=0;resultados=[];selecionados.clear();totalEhAprox=false;
+  $('emptyState').style.display='block';$('emptyMsg').textContent='Buscando na base...';setLoading(true);
+  try{
+    let r;
+    try{r=await apiFetch(currentQS,0,PAGE-1,true);}
+    catch(e){if((e.message||'').includes('57014')){r=await apiFetch(currentQS,0,PAGE-1,false);r.total=null;totalEhAprox=true;}else throw e;}
+    resultados=r.data;totalCount=r.total;offset=r.data.length;lastBatch=r.data.length;render();
+  }catch(e){showError(amigavel(e.message));$('emptyMsg').textContent='Não foi possível buscar.';}
+  setLoading(false);
+}
+async function carregarMais(){
+  if(loading)return;$('btnMore').disabled=true;$('btnMore').innerHTML='<span class="spin dark"></span> Carregando...';
+  try{const{data}=await apiFetch(currentQS,offset,offset+PAGE-1,false);resultados=resultados.concat(data);offset+=data.length;lastBatch=data.length;render();}
+  catch(e){showError(amigavel(e.message));}
+  $('btnMore').disabled=false;$('btnMore').innerHTML='Carregar mais '+PAGE;
+}
+function resumoChips(f){if(!f)return[];const c=[];if(f.busca)c.push('Busca: '+f.busca);if(f.cnpj)c.push('CNPJ: '+f.cnpj);if(f.semContadores)c.push('Sem contadores');if(f.uf)c.push('UF: '+f.uf);if(f.municipio)c.push('Município: '+f.municipio);if(f.cnae&&f.cnae.length)c.push('CNAE: '+(Array.isArray(f.cnae)?(f.cnae.length+' selec.'):f.cnae));if(f.situacao)c.push('Situação: '+f.situacao);if(f.tipo)c.push('Tipo: '+f.tipo);if(f.simples)c.push('Simples: '+(f.simples==='sim'?'Sim':'Não'));if(f.mei)c.push('MEI: '+(f.mei==='sim'?'Sim':'Não'));if(f.porte)c.push('Porte: '+f.porte);if(f.capMin||f.capMax)c.push('Capital: '+(f.capMin?'R$'+f.capMin:'0')+'→'+(f.capMax?'R$'+f.capMax:'∞'));if(f.abreDe||f.abreAte)c.push('Abertura: '+(f.abreDe?dataBR(f.abreDe):'…')+'→'+(f.abreAte?dataBR(f.abreAte):'…'));return c.length?c:['Sem filtros — toda a base'];}
+function setView(v){viewMode=v;$('vtCards').classList.toggle('on',v==='cards');$('vtTable').classList.toggle('on',v==='table');render();}
+function render(){
+  const big=(totalCount!=null&&totalCount>2000);
+  $('cnt').textContent=totalCount!=null?(big?'≈ ':'')+nfmt(totalCount):(totalEhAprox?nfmt(resultados.length)+'+':nfmt(resultados.length));
+  $('cntSub').textContent=!buscaJaFeita?'Carregando...':(resultados.length?('Mostrando '+resultados.length+(totalCount!=null?' de '+(big?'~':'')+nfmt(totalCount):'')+' · '+((big||totalEhAprox)?'contagem aproximada':'contagem exata')):'Nenhuma empresa com esses filtros.');
+  const chipBox=$('filterChips');if(buscaJaFeita){chipBox.style.display='flex';chipBox.innerHTML='<span class="lbl">Filtros</span>'+resumoChips(filtrosAplicados).map(c=>'<span class="chip-filter">'+esc(c)+'</span>').join('');}
+  const empty=$('emptyState'),cards=$('cardsView'),table=$('tableView'),more=$('moreBox');
+  if(!resultados.length){empty.style.display='block';cards.style.display='none';table.style.display='none';more.style.display='none';if(buscaJaFeita)$('emptyMsg').innerHTML='Nenhuma empresa encontrada. Tente afrouxar os filtros.';atualizaSel();return;}
+  empty.style.display='none';cards.style.display=viewMode==='cards'?'grid':'none';table.style.display=viewMode==='table'?'block':'none';
+  viewMode==='cards'?renderCards():renderTable();more.style.display=(lastBatch>=PAGE)?'block':'none';atualizaSel();
+}
+function renderCards(){const box=$('cardsView'),frag=document.createDocumentFragment();box.innerHTML='';resultados.forEach((e,idx)=>{const sel=selecionados.has(e.cnpj),card=document.createElement('div');card.className='lead-card'+(sel?' sel':'');card.onclick=(ev)=>{if(ev.target.tagName!=='INPUT')abrirModal(idx);};card.innerHTML='<div class="lc-top"><input type="checkbox" data-c="'+e.cnpj+'" '+(sel?'checked':'')+' onclick="selOne(this);event.stopPropagation();"><div class="lc-name">'+esc(e.nome_fantasia||e.razao_social)+'</div><span class="st '+(e.situacao||'').toLowerCase()+'">'+esc(e.situacao)+'</span></div><div class="lc-cnpj">'+fmtCnpj(e.cnpj)+'</div><div class="lc-row"><span class="i">📍</span>'+esc(e.municipio)+' / '+esc(e.uf)+'</div><div class="lc-cnae"><b>'+esc(e.cnae_principal)+'</b> · '+esc(e.cnae_desc)+'</div><div class="lc-row"><span class="i">📞</span>'+esc(e.telefone||'—')+'</div><div class="lc-row"><span class="i">✉</span>'+esc(e.email||'—')+'</div><div class="lc-tags"><span class="tag">'+esc(e.porte)+'</span>'+(e.simples?'<span class="tag">Simples</span>':'')+(e.mei?'<span class="tag">MEI</span>':'')+'<span class="tag">'+esc(e.tipo)+'</span></div><div class="lc-foot"><span>'+brl(e.capital_social)+' · '+dataBR(e.data_abertura)+'</span><span class="ver">ver detalhes →</span></div>';frag.appendChild(card);});box.appendChild(frag);}
+function renderTable(){const tb=$('tbody'),frag=document.createDocumentFragment();tb.innerHTML='';$('chkAll').checked=false;resultados.forEach((e,idx)=>{const tr=document.createElement('tr');tr.onclick=(ev)=>{if(ev.target.tagName!=='INPUT')abrirModal(idx);};tr.innerHTML='<td><input type="checkbox" data-c="'+e.cnpj+'" '+(selecionados.has(e.cnpj)?'checked':'')+' onclick="selOne(this);event.stopPropagation();"></td><td class="cnpj">'+fmtCnpj(e.cnpj)+'</td><td class="razao"><b>'+esc(e.razao_social)+'</b><small>'+esc(e.nome_fantasia)+'</small></td><td>'+esc(e.municipio)+' / '+esc(e.uf)+'</td><td><span class="tag-cnae">'+esc(e.cnae_principal)+'</span><br><small style="color:var(--muted)">'+esc(e.cnae_desc)+'</small></td><td><span class="st '+(e.situacao||'').toLowerCase()+'">'+esc(e.situacao)+'</span></td><td>'+esc(e.porte)+(e.simples?' · Simples':'')+(e.mei?' · MEI':'')+'</td><td>'+brl(e.capital_social)+'</td><td>'+dataBR(e.data_abertura)+'</td><td>'+esc(e.telefone||'—')+'</td><td>'+esc(e.email||'—')+'</td>';frag.appendChild(tr);});tb.appendChild(frag);}
+function selOne(cb){const c=cb.dataset.c;cb.checked?selecionados.add(c):selecionados.delete(c);if(viewMode==='cards'){const card=cb.closest('.lead-card');if(card)card.classList.toggle('sel',cb.checked);}atualizaSel();}
+function toggleAll(cb){document.querySelectorAll('#tbody input[type=checkbox]').forEach(c=>{c.checked=cb.checked;cb.checked?selecionados.add(c.dataset.c):selecionados.delete(c.dataset.c);});atualizaSel();}
+function atualizaSel(){const n=selecionados.size;$('selInfo').innerHTML=n?'<b>'+n+'</b> selecionada(s) — a exportação inclui só as selecionadas.':'Nenhuma selecionada — a exportação baixa <b>todas as filtradas</b> (até '+nfmt(EXPORT_CAP)+'). Marque empresas p/ exportar só elas.';}
+function abrirModal(idx){const e=resultados[idx];if(!e)return;modalRow=e;$('mFant').textContent=e.nome_fantasia||e.razao_social;$('mRazao').textContent=e.razao_social;const it=(k,v)=>'<div class="mb-item"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>',itf=(k,v)=>'<div class="mb-item full"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';$('mGrid').innerHTML=itf('CNPJ','<span class="mb-cnpj">'+fmtCnpj(e.cnpj)+'</span> · <span class="st '+(e.situacao||'').toLowerCase()+'">'+esc(e.situacao)+'</span>')+itf('Atividade (CNAE)','<b>'+esc(e.cnae_principal)+'</b> — '+esc(e.cnae_desc))+it('Município / UF',esc(e.municipio)+' / '+esc(e.uf))+it('Tipo',esc(e.tipo))+it('Porte',esc(e.porte))+it('Capital social',brl(e.capital_social))+it('Optante Simples',e.simples?'Sim':'Não')+it('MEI',e.mei?'Sim':'Não')+it('Data de abertura',dataBR(e.data_abertura))+it('Telefone',esc(e.telefone||'—'))+itf('E-mail',esc(e.email||'—'));$('modalBg').classList.add('show');}
+function fecharModal(){$('modalBg').classList.remove('show');modalRow=null;}
+function copiarCnpj(){if(!modalRow)return;const t=fmtCnpj(modalRow.cnpj);if(navigator.clipboard)navigator.clipboard.writeText(t);toast('📋 CNPJ copiado: '+t);}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharModal();});
+async function coletarRows(){
+  if(selecionados.size)return resultados.filter(r=>selecionados.has(r.cnpj));
+  toast('Preparando exportação...');let rows=[],from=0;
+  while(from<EXPORT_CAP){const{data}=await apiFetch(currentQS,from,from+999,false);rows=rows.concat(data);from+=1000;if(data.length<1000)break;}
+  return rows;
+}
+async function exportar(fmt){
+  if(!buscaJaFeita||(!resultados.length&&!selecionados.size)){toast('Aplique os filtros primeiro.');return;}
+  let rows;try{rows=await coletarRows();}catch(e){showError(amigavel(e.message));return;}
+  if(!rows.length){toast('Nada para exportar.');return;}
+  const data=new Date().toLocaleString('pt-BR');
+  const arq='leads-maximos-'+new Date().toISOString().slice(0,10).replace(/-/g,'');
+  if(fmt==='html'){return exportarDashboard(rows,data,arq);}
+  if(fmt==='pdf'){return exportarPDF(rows,data);}
+  const head=['CNPJ','Razão Social','Nome Fantasia','Município','UF','CNAE','Descrição CNAE','Situação','Tipo','Porte','Simples','MEI','Capital Social','Data Abertura','Telefone','E-mail'];
+  const body=rows.map(e=>[fmtCnpj(e.cnpj),e.razao_social,e.nome_fantasia,e.municipio,e.uf,e.cnae_principal,e.cnae_desc,e.situacao,e.tipo,e.porte,e.simples?'Sim':'Não',e.mei?'Sim':'Não',e.capital_social,dataBR(e.data_abertura),e.telefone,e.email]);
+  if(fmt==='xlsx'&&window.XLSX){const ws=XLSX.utils.aoa_to_sheet([head,...body]);ws['!cols']=[20,32,26,18,5,12,32,9,8,8,7,5,15,12,16,26].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads');XLSX.writeFile(wb,arq+'.xlsx');}
+  else{const csv=[head,...body].map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(';')).join('\r\n');baixar('﻿'+csv,arq+'.csv','text/csv');}
+  toast('✅ '+nfmt(rows.length)+' empresa(s) exportada(s)'+(rows.length>=EXPORT_CAP?' (limite '+nfmt(EXPORT_CAP)+')':'')+'.');
+}
+function baixar(conteudo,nome,tipo){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([conteudo],{type:tipo+';charset=utf-8'}));a.download=nome;a.click();}
+function contar(rows,campo){const m={};rows.forEach(r=>{const k=r[campo]||'—';m[k]=(m[k]||0)+1;});return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
+function exportarDashboard(rows,data,arq){
+  baixar(gerarDashboardHtml(rows,data,false),arq+'-dashboard.html','text/html');
+  toast('📊 Dashboard de '+nfmt(rows.length)+' empresa(s) gerado!');
+}
+function exportarPDF(rows,data){
+  const html=gerarDashboardHtml(rows,data,true);
+  let w=null;try{w=window.open('','_blank');}catch(e){}
+  if(!w){baixar(html,'leads-maximos-dashboard.html','text/html');toast('⚠️ Permita pop-ups p/ gerar PDF. Baixei o relatório — abra e use Ctrl+P → Salvar como PDF.');return;}
+  w.document.open();w.document.write(html);w.document.close();
+  toast('📄 Use "Salvar como PDF" na janela que abriu ('+nfmt(rows.length)+' empresas).');
+}
+function gerarDashboardHtml(rows,data,autoPrint){
+  const n=rows.length, top=arr=>arr.slice(0,6);
+  const porPorte=contar(rows,'porte'), porSit=contar(rows,'situacao'), porMun=contar(rows,'municipio'), porCnae=contar(rows,'cnae_desc');
+  const comTel=rows.filter(r=>r.telefone&&r.telefone.trim()).length, comEmail=rows.filter(r=>r.email&&r.email.trim()).length;
+  const capMedio=rows.reduce((s,r)=>s+(Number(r.capital_social)||0),0)/(n||1);
+  const chips=resumoChips(filtrosAplicados).map(c=>'<span class="c">'+esc(c)+'</span>').join('');
+  const kpi=(v,l)=>'<div class="kpi"><div class="kv">'+v+'</div><div class="kl">'+l+'</div></div>';
+  const autoScript=autoPrint?'<script>addEventListener("load",function(){setTimeout(function(){print()},500)})<\/script>':'';
+  const barRows=(arr,tot)=>top(arr).map(([k,v])=>'<div class="bar"><div class="bl">'+esc(k)+'</div><div class="bt"><div class="bf" style="width:'+Math.max(4,Math.round(v/tot*100))+'%"></div></div><div class="bv">'+nfmt(v)+'</div></div>').join('');
+  const linhas=rows.slice(0,2000).map(e=>'<tr><td>'+fmtCnpj(e.cnpj)+'</td><td><b>'+esc(e.razao_social)+'</b><br><span class="mut">'+esc(e.nome_fantasia||'')+'</span></td><td>'+esc(e.municipio)+'/'+esc(e.uf)+'</td><td>'+esc(e.cnae_principal)+'<br><span class="mut">'+esc(e.cnae_desc)+'</span></td><td>'+esc(e.porte)+'</td><td>'+brl(e.capital_social)+'</td><td>'+esc(e.telefone||'—')+'</td><td>'+esc(e.email||'—')+'</td></tr>').join('');
+  const logoTag = LOGO ? '<img src="'+LOGO+'" style="height:40px;border-radius:8px">' : '<div style="font-weight:800;font-size:22px;letter-spacing:1px">MAXIMOS</div>';
+  const html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relatório de Prospecção — MAXIMOS</title>'+
+  '<style>*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#f5f6f8;color:#15191e}'+
+  '.hd{background:#0f1419;color:#fff;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:3px solid #27c24c}'+
+  '.hd .t{font-size:13px;color:#aeb6c0}.hd .t b{color:#27c24c}'+
+  '.wrap{max-width:1180px;margin:0 auto;padding:24px}'+
+  'h1{font-size:22px;margin:4px 0 2px}.sub{color:#8b929b;font-size:13px;margin-bottom:16px}'+
+  '.chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 22px}.chips .c{background:#eafaef;border:1px solid #c7eed2;color:#1ea33e;font-size:12px;font-weight:600;padding:4px 11px;border-radius:16px}'+
+  '.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}'+
+  '.kpi{background:#fff;border:1px solid #ebedf0;border-radius:14px;padding:18px}.kv{font-size:26px;font-weight:800;color:#1ea33e}.kl{font-size:12px;color:#8b929b;margin-top:3px}'+
+  '.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}@media(max-width:760px){.cols{grid-template-columns:1fr}}'+
+  '.box{background:#fff;border:1px solid #ebedf0;border-radius:14px;padding:18px}.box h3{font-size:13px;margin:0 0 14px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280}'+
+  '.bar{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12.5px}.bl{width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt{flex:1;background:#f1f3f5;border-radius:6px;height:9px;overflow:hidden}.bf{height:9px;background:#27c24c;border-radius:6px}.bv{width:54px;text-align:right;font-weight:700;color:#1ea33e}'+
+  '.box.full{margin-bottom:22px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#fafbfc;text-align:left;padding:10px;color:#6b7280;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #ebedf0}td{padding:10px;border-bottom:1px solid #f1f3f5;vertical-align:top}.mut{color:#8b929b}'+
+  '.ft{text-align:center;color:#8b929b;font-size:11.5px;padding:18px}'+
+  '.pdfbtn{position:fixed;top:16px;right:18px;z-index:99;background:#27c24c;color:#fff;border:none;padding:11px 17px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.2);font-family:inherit}'+
+  '@media print{.pdfbtn{display:none!important}.box,.kpi,tr{break-inside:avoid}body{background:#fff}}</style></head><body>'+
+  '<button class="pdfbtn" onclick="window.print()">🖨️ Salvar como PDF</button>'+
+  '<div class="hd">'+logoTag+'<div class="t">Relatório de Prospecção · <b>base CNPJ (Receita Federal)</b></div></div>'+
+  '<div class="wrap"><h1>Relatório de Prospecção de Leads</h1><div class="sub">Gerado em '+data+' · MAXIMOS Soluções Empresariais</div>'+
+  '<div class="chips">'+chips+'</div>'+
+  '<div class="kpis">'+kpi(nfmt(n),'Empresas')+kpi(porMun.length,'Cidades')+kpi(porCnae.length,'Ramos (CNAE)')+kpi(Math.round(comTel/n*100)+'%','Com telefone')+kpi(Math.round(comEmail/n*100)+'%','Com e-mail')+kpi(brl(capMedio),'Capital médio')+'</div>'+
+  '<div class="cols"><div class="box"><h3>Top municípios</h3>'+barRows(porMun,n)+'</div><div class="box"><h3>Top ramos (CNAE)</h3>'+barRows(porCnae,n)+'</div></div>'+
+  '<div class="cols"><div class="box"><h3>Por porte</h3>'+barRows(porPorte,n)+'</div><div class="box"><h3>Por situação</h3>'+barRows(porSit,n)+'</div></div>'+
+  '<div class="box full"><h3>Empresas'+(n>2000?' (primeiras 2.000 — lista completa no Excel)':'')+'</h3><table><thead><tr><th>CNPJ</th><th>Empresa</th><th>Cidade</th><th>CNAE</th><th>Porte</th><th>Capital</th><th>Telefone</th><th>E-mail</th></tr></thead><tbody>'+linhas+'</tbody></table></div>'+
+  '<div class="ft">MAXIMOS Soluções Empresariais · dados da Receita Federal</div></div>'+autoScript+'</body></html>';
+  return html;
+}
+const LS='maximos_buscas_v2';
+const BREST=SUPA_URL+'/rest/v1/buscas_salvas';
+function authH(extra){const h={'apikey':SUPA_KEY,'Authorization':'Bearer '+accessToken};if(extra)Object.assign(h,extra);return h;}
+async function loadBuscas(){
+  nuvemOk=false;
+  if(accessToken){
+    try{const r=await fetch(BREST+'?select=*&order=criado_em.desc',{headers:authH()});
+      if(r.ok){const d=await r.json();BUSCAS=d.map(b=>({id:b.id,nome:b.nome,pasta:b.pasta||'Sem pasta',data:dataHora(b.criado_em),filtros:b.filtros||{},resumo:resumoChips(b.filtros||{})}));nuvemOk=true;return;}}catch(e){}
+  }
+  try{BUSCAS=JSON.parse(localStorage.getItem(LS)||'[]');}catch(e){BUSCAS=[];}
+}
+function persist(){try{localStorage.setItem(LS,JSON.stringify(BUSCAS));}catch(e){}}
+function nid(){return 'b'+Math.random().toString(36).slice(2,9);}
+async function salvarBusca(){
+  const nome=($('saveName').value||'').trim();if(!nome){toast('⚠️ Dê um nome para a busca.');return;}
+  const pasta=($('saveFolder').value||'').trim()||'Sem pasta',f=getFiltros();
+  if(nuvemOk&&accessToken){
+    try{const r=await fetch(BREST,{method:'POST',headers:authH({'Content-Type':'application/json'}),body:JSON.stringify({nome,pasta,filtros:f})});
+      if(r.ok){await loadBuscas();renderSaved();renderFolders();$('saveName').value='';toast('☁️ Busca salva na nuvem.');return;}}catch(e){}
+    toast('⚠️ Falha na nuvem — salvei neste navegador.');
+  }
+  BUSCAS.unshift({id:nid(),nome,pasta,data:new Date().toLocaleString('pt-BR'),filtros:f,resumo:resumoChips(f)});persist();renderSaved();renderFolders();$('saveName').value='';toast('💾 Busca salva.');
+}
+function aplicarBusca(id){const b=BUSCAS.find(x=>x.id===id);if(!b)return;setFiltros(b.filtros);filtrar();window.scrollTo({top:0,behavior:'smooth'});toast('🔄 Busca aplicada.');}
+async function excluirBusca(id){
+  const b=BUSCAS.find(x=>x.id===id);if(!b||!confirm('Excluir “'+b.nome+'”?'))return;
+  if(nuvemOk&&accessToken){
+    try{const r=await fetch(BREST+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:authH()});
+      if(r.ok){await loadBuscas();renderSaved();renderFolders();return;}}catch(e){}
+  }
+  BUSCAS=BUSCAS.filter(x=>x.id!==id);persist();renderSaved();renderFolders();
+}
+function renderFolders(){const dl=$('folderList');dl.innerHTML='';[...new Set(BUSCAS.map(b=>b.pasta))].forEach(p=>{const o=document.createElement('option');o.value=p;dl.appendChild(o);});}
+function renderSaved(){const q=($('savedSearch').value||'').toLowerCase(),body=$('savedBody');body.innerHTML='';const list=BUSCAS.filter(b=>!q||b.nome.toLowerCase().includes(q)||b.pasta.toLowerCase().includes(q));if(!list.length){body.innerHTML='<div class="saved-empty">'+(BUSCAS.length?'Nenhuma corresponde.':'Nenhuma busca salva ainda. Monte os filtros e clique em “Salvar busca”.')+'</div>';return;}[...new Set(list.map(b=>b.pasta))].forEach(p=>{const g=document.createElement('div');g.innerHTML='<div class="folder-name">📁 '+esc(p)+'</div>';list.filter(b=>b.pasta===p).forEach(b=>{const it=document.createElement('div');it.className='saved-item';it.innerHTML='<div class="si-main"><div class="si-name">'+esc(b.nome)+'</div><div class="si-date">'+b.data+'</div><div class="si-chips">'+b.resumo.map(c=>'<span class="mini-chip">'+esc(c)+'</span>').join('')+'</div></div><div class="si-actions"><button class="btn btn-mini btn-apply-mini" onclick="aplicarBusca(\''+b.id+'\')">Aplicar</button><button class="btn btn-mini btn-del" onclick="excluirBusca(\''+b.id+'\')">🗑</button></div>';g.appendChild(it);});body.appendChild(g);});}
+function limpar(){['fBusca','fCnpj','fCapMin','fCapMax','fAbreDe','fAbreAte','fSituacao','fTipo','fSimples','fMei','fPorte'].forEach(id=>$(id).value='');$('fUf').value='SP';if(refsMunOk)$('fMunicipio').value='';else $('fMunicipioTxt').value='';if(refsCnaeOk){cnaeSel.clear();renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value='';$('cnaeSearch').value='';if(semContadores)toggleContadores();filtrar();}
+let jaIniciou=false;
+async function iniciar(){
+  if(jaIniciou)return;jaIniciou=true;
+  fetch('logo-maximos.jpg').then(r=>r.blob()).then(b=>{const fr=new FileReader();fr.onload=()=>LOGO=fr.result;fr.readAsDataURL(b);}).catch(()=>{});
+  await loadBuscas();renderFolders();renderSaved();carregarMeta();
+  await carregarReferencias();
+  filtrar();
+}
+initAuth();
+</script>
+</body>
+</html>
