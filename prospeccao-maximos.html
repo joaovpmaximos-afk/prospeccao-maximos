@@ -379,8 +379,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- login por chamada direta (sem dependencia de CDN externa) -->
+<script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const SUPA_URL='https://crlirvufkbykywkxdqsa.supabase.co';
 const SUPA_KEY='sb_publishable_i9c0T5PfVKMOg1GlY_Qzdg_t06faOG0';
@@ -398,17 +398,17 @@ function gateHide(){$('gate').style.display='none';}
 function hdrUser(){const el=$('hdrUser');if(usuario){el.style.display='flex';el.innerHTML='👤 '+esc(usuario.email||'')+' <a onclick="logout()">Sair</a>';}else{el.style.display='none';}}
 async function gateLogin(){
   const email=($('gateEmail').value||'').trim(),senha=$('gateSenha').value||'',msg=$('gateMsg'),btn=$('gateBtn');
-  if(!supaAuth){msg.textContent='Login indisponível (sem conexão).';return;}
+  msg.textContent='';
   if(!email||!senha){msg.textContent='Informe e-mail e senha.';return;}
   btn.disabled=true;btn.textContent='Entrando...';
-  try{const{data,error}=await supaAuth.auth.signInWithPassword({email,password:senha});if(error)throw error;usuario=data.user;accessToken=(data.session&&data.session.access_token)||null;gateHide();hdrUser();iniciar();}
-  catch(e){msg.textContent='❌ '+(((e.message||'').indexOf('Invalid login')>=0)?'E-mail ou senha incorretos.':(e.message||'falha'));}
+  try{const _r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});const _d=await _r.json();if(!_r.ok)throw new Error(_d.error_description||_d.msg||_d.error_code||('HTTP '+_r.status));accessToken=_d.access_token;usuario={email:(_d.user&&_d.user.email)||email};try{localStorage.setItem('maximos_sess',JSON.stringify({t:accessToken,e:usuario.email}));}catch(_e){}gateHide();hdrUser();iniciar();}
+  catch(e){var _m=(e.message||'').toLowerCase();msg.textContent='❌ '+(_m.indexOf('invalid')>=0?'E-mail ou senha incorretos.':(_m.indexOf('confirm')>=0?'Conta não confirmada — marque "Auto Confirm" no Supabase.':(e.message||'Falha no login')));}
   finally{btn.disabled=false;btn.textContent='Entrar';}
 }
-async function logout(){if(supaAuth){try{await supaAuth.auth.signOut();}catch(e){}}usuario=null;accessToken=null;nuvemOk=false;hdrUser();gateShow();}
+async function logout(){usuario=null;accessToken=null;nuvemOk=false;try{localStorage.removeItem('maximos_sess');}catch(e){}hdrUser();gateShow();}
 async function initAuth(){
-  if(!supaAuth){gateHide();iniciar();return;}
-  try{const{data}=await supaAuth.auth.getSession();usuario=(data&&data.session)?data.session.user:null;accessToken=(data&&data.session)?data.session.access_token:null;}catch(e){usuario=null;}
+  try{var _s=JSON.parse(localStorage.getItem('maximos_sess')||'null');if(_s&&_s.t){const _r=await fetch(SUPA_URL+'/auth/v1/user',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+_s.t}});if(_r.ok){accessToken=_s.t;usuario={email:_s.e};hdrUser();gateHide();iniciar();return;}}}catch(_e){}
+  usuario=null;accessToken=null;
   hdrUser();usuario?(gateHide(),iniciar()):gateShow();
 }
 function toggleAcc(h){h.parentElement.classList.toggle('open');}
