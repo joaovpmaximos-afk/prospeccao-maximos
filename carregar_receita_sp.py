@@ -1,17 +1,16 @@
 # =====================================================================
-#  MAXIMOS · Carregador da base de CNPJ -> Supabase  (v4 — SP completo)
+#  MAXIMOS · Carregador da base de CNPJ -> Supabase  (v6 — multi-estados)
 #  Cole TODO este conteúdo em UMA célula do Google Colab e clique em Run.
-#  Memória-segura: grava os estabelecimentos em disco (não estoura a RAM).
-#  Mirror Cloudflare (não bloqueia o Colab).
+#  Memória-segura (grava estabelecimentos em disco) + RE-TENTATIVA automática.
+#  ADICIONA os estados de UFS à base existente (não apaga o que já tem).
 #
-#  Antes: tabela criada (supabase-empresas.sql) e projeto no Supabase ATIVO (Pro).
 #  Precisa (Supabase > Settings > API): SUPABASE_URL e SUPABASE_SERVICE_KEY (secret).
 #  >>> NUNCA cole a chave secret no chat. Só aqui no Colab. <<<
 # =====================================================================
 import subprocess, sys
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "supabase", "requests", "tqdm"])
 
-import os, io, csv, re, json, zipfile, requests
+import os, io, csv, re, json, time, zipfile, requests
 from supabase import create_client
 
 def _secret(n):
@@ -30,10 +29,11 @@ SUPABASE_SERVICE_KEY = _secret("SUPABASE_SERVICE_KEY")
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 # ===== CONFIG =====
-UFS          = {"SP"}       # estados
-SO_ATIVAS    = True         # só ATIVAS
+# Estados a ADICIONAR agora (SP já está carregado, por isso não está aqui):
+UFS          = {"RJ", "MG", "PR", "SC", "RS", "GO", "DF", "MT", "MS"}
+SO_ATIVAS    = True
 CNAES_FILTRO = set()        # vazio = todos os CNAEs
-LIMITE       = None         # None = SP INTEIRO (Pro). Ou um número p/ limitar.
+LIMITE       = None         # None = todos desses estados
 LOTE         = 5000
 PASTA_DATA   = ""           # "" = mais recente
 # ==================
@@ -50,7 +50,7 @@ if not PASTA_DATA:
     datas = sorted(set(re.findall(r"(\d{4}-\d{2}-\d{2})/", idx)))
     PASTA_DATA = datas[-1]
 PASTA = BASE + PASTA_DATA + "/"
-print("Usando base de:", PASTA_DATA)
+print("Usando base de:", PASTA_DATA, "| estados:", sorted(UFS))
 
 URLS_ESTAB = [PASTA + f"Estabelecimentos{i}.zip" for i in range(10)]
 URLS_EMP   = [PASTA + f"Empresas{i}.zip" for i in range(10)]
@@ -82,8 +82,8 @@ for r in linhas_zip(URL_CNAE):
     if len(r) >= 2: CNAE[r[0].strip()] = r[1].strip()
 print(f"  municípios: {len(MUN)}  cnaes: {len(CNAE)}")
 
-# PASS 1 — Estabelecimentos -> grava em disco (poupa RAM) e coleta os CNPJ básicos
-print(f"Estabelecimentos (gravando em disco, filtrando {UFS})...")
+# PASS 1 — Estabelecimentos -> disco (poupa RAM) + coleta CNPJ básicos
+print(f"Estabelecimentos (gravando em disco, filtrando {sorted(UFS)})...")
 precisa = set(); n_estab = 0; stop = False
 fout = open("/content/estab.jsonl", "w", encoding="utf-8")
 for url in URLS_ESTAB:
@@ -107,8 +107,7 @@ fout.close()
 print(f"  total estabelecimentos: {n_estab}  (empresas distintas: {len(precisa)})")
 if not n_estab: raise RuntimeError("Nada coletado.")
 
-# PASS 2 — Empresas (razão, capital, porte) — guarda como tupla p/ poupar memória
-print("Empresas...")
+print("Empresas (razão / capital / porte)...")
 EMP = {}
 for url in URLS_EMP:
     for r in linhas_zip(url):
@@ -120,7 +119,6 @@ for url in URLS_EMP:
             except Exception: cap = None
             EMP[bas] = (r[1].strip(), cap, PORTE.get(r[5].strip(), "Demais"))
 
-# PASS 3 — Simples / MEI
 print("Simples / MEI...")
 SIMP = {}
 for url in URLS_SIMP:
@@ -134,14 +132,21 @@ def _data(s):
     if s[4:6] == "00" or s[6:] == "00": return None
     return f"{s[:4]}-{s[4:6]}-{s[6:]}"
 
-# PASS 4 — lê o disco, junta e envia em lotes (streaming, baixa RAM)
-print(f"Enviando ao Supabase (lotes de {LOTE})...")
+# PASS 4 — lê o disco, junta e envia em lotes COM RE-TENTATIVA (aguenta soluços)
+print(f"Enviando ao Supabase (lotes de {LOTE}, com re-tentativa)...")
 lote = []; enviados = 0
 def flush():
     global enviados
-    if lote:
-        sb.table("empresas").upsert(lote).execute(); enviados += len(lote); lote.clear()
-        if enviados % 50000 == 0: print("  enviadas:", enviados)
+    if not lote: return
+    for tent in range(8):
+        try:
+            sb.table("empresas").upsert(lote).execute()
+            enviados += len(lote)
+            if enviados % 50000 == 0: print("  enviadas:", enviados)
+            lote.clear(); return
+        except Exception as ex:
+            print("   soluço, tentativa", tent + 1, "-", str(ex)[:70]); time.sleep(5 * (tent + 1))
+    raise RuntimeError("Falhou após várias tentativas no envio.")
 with open("/content/estab.jsonl", "r", encoding="utf-8") as f:
     for line in f:
         e = json.loads(line); bas = e["bas"]
@@ -154,4 +159,4 @@ with open("/content/estab.jsonl", "r", encoding="utf-8") as f:
             "telefone": e["tel"], "email": e["email"]})
         if len(lote) >= LOTE: flush()
 flush()
-print(f"\nPRONTO! Empresas enviadas: {enviados}")
+print(f"\nPRONTO! Empresas enviadas (estados novos): {enviados}")
