@@ -251,7 +251,7 @@
       </div>
       <div class="acc-body">
         <label>Estado (UF)</label>
-        <select id="fUf"><option value="SP">SP — São Paulo</option></select>
+        <select id="fUf" onchange="mudarUf()"><option value="SP">SP — São Paulo</option><option value="RJ">RJ — Rio de Janeiro</option><option value="MG">MG — Minas Gerais</option><option value="PR">PR — Paraná</option><option value="SC">SC — Santa Catarina</option><option value="RS">RS — Rio Grande do Sul</option><option value="GO">GO — Goiás</option><option value="DF">DF — Distrito Federal</option><option value="MT">MT — Mato Grosso</option><option value="MS">MS — Mato Grosso do Sul</option><option value="">Todos os estados</option></select>
         <label>Município</label>
         <select id="fMunicipio"><option value="">Todos os municípios</option></select>
         <input id="fMunicipioTxt" placeholder="Ex: Campinas..." style="display:none;">
@@ -422,7 +422,7 @@ async function carregarReferencias(){
   try{const r=await fetch(SUPA_URL+'/rest/v1/cnaes?select=codigo,descricao,qtde&order=qtde.desc',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){CNAES=d.map(x=>[x.codigo,x.descricao,x.qtde]);refsCnaeOk=true;}}}catch(e){}
   if(refsCnaeOk)renderCnaeList();
   else{$('cnaeSearch').style.display='none';$('cnaeList').style.display='none';$('cnaeChips').style.display='none';$('fCnaeTxt').style.display='block';$('cnaeSub').textContent='Digite código ou ramo';}
-  try{const uf=$('fUf').value||'SP';const r=await fetch(SUPA_URL+'/rest/v1/municipios?select=municipio&uf=eq.'+uf+'&order=municipio',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){const sel=$('fMunicipio');d.forEach(m=>{const o=document.createElement('option');o.value=m.municipio;o.textContent=m.municipio;sel.appendChild(o);});refsMunOk=true;}}}catch(e){}
+  await carregarMunicipios($('fUf').value);
   if(!refsMunOk){$('fMunicipio').style.display='none';$('fMunicipioTxt').style.display='block';$('munHint').textContent='Digite o começo do nome da cidade.';}
   try{const r=await fetch(SUPA_URL+'/rest/v1/situacoes?select=situacao,qtde&order=qtde.desc',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){const sel=$('fSituacao');sel.innerHTML='<option value="">Todas</option>';d.forEach(s=>{const o=document.createElement('option');o.value=s.situacao;o.textContent=s.situacao+' ('+nfmt(s.qtde)+')';sel.appendChild(o);});}}}catch(e){}
 }
@@ -620,7 +620,9 @@ async function excluirBusca(id){
 }
 function renderFolders(){const dl=$('folderList');dl.innerHTML='';[...new Set(BUSCAS.map(b=>b.pasta))].forEach(p=>{const o=document.createElement('option');o.value=p;dl.appendChild(o);});}
 function renderSaved(){const q=($('savedSearch').value||'').toLowerCase(),body=$('savedBody');body.innerHTML='';const list=BUSCAS.filter(b=>!q||b.nome.toLowerCase().includes(q)||b.pasta.toLowerCase().includes(q));if(!list.length){body.innerHTML='<div class="saved-empty">'+(BUSCAS.length?'Nenhuma corresponde.':'Nenhuma busca salva ainda. Monte os filtros e clique em “Salvar busca”.')+'</div>';return;}[...new Set(list.map(b=>b.pasta))].forEach(p=>{const g=document.createElement('div');g.innerHTML='<div class="folder-name">📁 '+esc(p)+'</div>';list.filter(b=>b.pasta===p).forEach(b=>{const it=document.createElement('div');it.className='saved-item';it.innerHTML='<div class="si-main"><div class="si-name">'+esc(b.nome)+'</div><div class="si-date">'+b.data+'</div><div class="si-chips">'+b.resumo.map(c=>'<span class="mini-chip">'+esc(c)+'</span>').join('')+'</div></div><div class="si-actions"><button class="btn btn-mini btn-apply-mini" onclick="aplicarBusca(\''+b.id+'\')">Aplicar</button><button class="btn btn-mini btn-del" onclick="excluirBusca(\''+b.id+'\')">🗑</button></div>';g.appendChild(it);});body.appendChild(g);});}
-function limpar(){['fBusca','fCnpj','fCapMin','fCapMax','fAbreDe','fAbreAte','fSituacao','fTipo','fSimples','fMei','fPorte'].forEach(id=>$(id).value='');$('fUf').value='SP';if(refsMunOk)$('fMunicipio').value='';else $('fMunicipioTxt').value='';if(refsCnaeOk){cnaeSel.clear();renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value='';$('cnaeSearch').value='';if(semContadores)toggleContadores();filtrar();}
+function limpar(){['fBusca','fCnpj','fCapMin','fCapMax','fAbreDe','fAbreAte','fSituacao','fTipo','fSimples','fMei','fPorte'].forEach(id=>$(id).value='');$('fUf').value='SP';if(refsMunOk)$('fMunicipio').value='';else $('fMunicipioTxt').value='';if(refsCnaeOk){cnaeSel.clear();renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value='';$('cnaeSearch').value='';if(semContadores)toggleContadores();carregarMunicipios('SP');filtrar();}
+async function carregarMunicipios(uf){const sel=$('fMunicipio');sel.innerHTML='<option value="">Todos os municípios</option>';sel.style.display='';$('fMunicipioTxt').style.display='none';refsMunOk=true;if(!uf)return;try{const r=await fetch(SUPA_URL+'/rest/v1/municipios?select=municipio&uf=eq.'+uf+'&order=municipio',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();d.forEach(m=>{const o=document.createElement('option');o.value=m.municipio;o.textContent=m.municipio;sel.appendChild(o);});}}catch(e){}}
+function mudarUf(){carregarMunicipios($('fUf').value);}
 let jaIniciou=false;
 async function iniciar(){
   if(jaIniciou)return;jaIniciou=true;
