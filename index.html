@@ -239,7 +239,7 @@
 <div class="wrap">
   <aside class="panel">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filtros</h2>
-    <div class="field"><input class="search" id="fBusca" placeholder="Buscar razão social ou fantasia..."></div>
+    <div class="field"><input class="search" id="fBusca" placeholder="Buscar por nome — separe por vírgula: sacola, blusa..."></div>
     <div class="field"><input class="search" id="fCnpj" placeholder="Pesquisar por CNPJ (só números)..."></div>
     <div class="toggle-card" id="tgContadores" onclick="toggleContadores()">
       <div class="tc-ico">🛡️</div>
@@ -462,7 +462,7 @@ function buildQuery(f){
   if(f.capMax)p.push('capital_social=lte.'+parseFloat(f.capMax));
   if(f.abreDe)p.push('data_abertura=gte.'+f.abreDe);
   if(f.abreAte)p.push('data_abertura=lte.'+f.abreAte);
-  if(f.busca){const b=encodeURIComponent(f.busca.replace(/[(),*]/g,' ').trim());p.push('or=(razao_social.ilike.*'+b+'*,nome_fantasia.ilike.*'+b+'*)');}
+  if(f.busca){const _t=f.busca.split(',').map(t=>t.replace(/[()*]/g,' ').trim()).filter(Boolean);if(_t.length){const _c=_t.map(t=>{const b=encodeURIComponent(t);return 'razao_social.ilike.*'+b+'*,nome_fantasia.ilike.*'+b+'*';}).join(',');p.push('or=('+_c+')');}}
   if(f.cnpj)p.push('cnpj=like.*'+f.cnpj+'*');
   return p.join('&');
 }
