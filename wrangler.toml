@@ -1,0 +1,7 @@
+# Cloudflare Worker — apenas arquivos estáticos (serve o app da raiz do repo)
+# O app é um HTML único (index.html) + logo; sem build, sem servidor.
+name = "prospeccao-maximos"
+compatibility_date = "2026-06-01"
+
+[assets]
+directory = "."
