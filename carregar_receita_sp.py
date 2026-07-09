@@ -29,8 +29,10 @@ SUPABASE_SERVICE_KEY = _secret("SUPABASE_SERVICE_KEY")
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 # ===== CONFIG =====
-# Estados a ADICIONAR agora (SP já está carregado, por isso não está aqui):
-UFS          = {"RJ", "MG", "PR", "SC", "RS", "GO", "DF", "MT", "MS"}
+# Estados a ADICIONAR agora — NORTE + NORDESTE (os outros 10 já estão carregados):
+#   Norte: AC AP AM PA RO RR TO   |   Nordeste: AL BA CE MA PB PE PI RN SE
+# DICA: se o Colab ficar sem memória, rode em 2 partes (só o Norte; depois só o Nordeste).
+UFS          = {"AC", "AP", "AM", "PA", "RO", "RR", "TO", "AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"}
 SO_ATIVAS    = True
 CNAES_FILTRO = set()        # vazio = todos os CNAEs
 LIMITE       = None         # None = todos desses estados
