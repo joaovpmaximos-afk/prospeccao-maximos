@@ -83,6 +83,23 @@
   .acc-body select[multiple] option:checked{background:linear-gradient(0deg,var(--verde),var(--verde));color:#fff;font-weight:600;}
   .ms-hint{font-size:11px;color:var(--muted);margin-top:5px;}
   .hintline{font-size:10.5px;color:var(--muted);margin-top:5px;}
+  .uf-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;}
+  .pill-opt{font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--line);background:#fafbfc;color:var(--soft);cursor:pointer;user-select:none;transition:.12s;}
+  .pill-opt:hover{border-color:var(--verde-line);color:var(--verde2);}
+  .pill-opt.on{background:var(--verde);color:#fff;border-color:var(--verde);}
+  .mun-list{border:1px solid var(--line);border-radius:10px;margin-top:2px;max-height:190px;overflow:auto;background:#fff;box-shadow:0 6px 18px rgba(16,20,24,.06);}
+  .mun-opt{padding:8px 11px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--line2);}
+  .mun-opt:last-child{border-bottom:none;}
+  .mun-opt:hover{background:var(--verde-soft);color:var(--verde2);}
+  .mun-empty{padding:9px 11px;font-size:12.5px;color:var(--muted);}
+  .ai-cnae{display:flex;gap:7px;margin-top:8px;}
+  .ai-cnae input{flex:1;min-width:0;padding:10px 11px;border:1px solid var(--verde-line);border-radius:10px;font-size:13px;background:var(--verde-soft);font-family:inherit;color:var(--ink);}
+  .ai-cnae input:focus{outline:none;border-color:var(--verde);background:#fff;box-shadow:0 0 0 3px var(--verde-soft);}
+  .ai-cnae input::placeholder{color:var(--verde2);opacity:.75;}
+  .ai-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;border:none;border-radius:10px;background:var(--verde);color:#fff;font-weight:700;font-size:13px;padding:0 14px;cursor:pointer;font-family:inherit;}
+  .ai-btn:hover{background:var(--verde2);}
+  .ai-hint{font-size:11.5px;color:var(--soft);margin-top:6px;}
+  .ai-hint a{color:var(--verde2);text-decoration:underline;font-weight:600;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .badge-paid{font-size:9.5px;background:#fff7e6;color:#9a6b00;border:1px solid #f3e3b8;padding:2px 7px;border-radius:6px;font-weight:700;margin-left:6px;}
   .chk-list{max-height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:4px;margin-top:6px;}
@@ -142,6 +159,10 @@
   .btn-csv:hover{border-color:#cfd6df;color:var(--ink);}
   .btn-pdf{background:#fff;color:#c0392b;border:1px solid #f0c9c4;}
   .btn-pdf:hover{background:#fdeeec;}
+  .btn-google{background:#fff;color:#3c4043;border:1px solid #dadce0;font-weight:600;box-shadow:0 1px 2px rgba(60,64,67,.14);letter-spacing:.1px;}
+  .btn-google:hover{background:#f8faff;border-color:#d2e3fc;box-shadow:0 1px 3px rgba(60,64,67,.22);}
+  .btn-google:active{background:#f1f3f4;}
+  .btn-google svg{width:17px;height:17px;flex:0 0 auto;}
   .chips{padding:13px 24px;display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid var(--line2);}
   .chips .lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;align-self:center;margin-right:3px;}
   .chip-filter{font-size:11.5px;background:var(--verde-soft);border:1px solid var(--verde-line);color:var(--verde2);padding:4px 11px;border-radius:16px;font-weight:600;}
@@ -258,13 +279,18 @@
       </div>
       <div class="acc-body">
         <label>Estado (UF)</label>
-        <select id="fUf" multiple size="6" onchange="mudarUf()" onmousedown="msToggle(event)"><option value="SP" selected>SP — São Paulo</option><option value="RJ">RJ — Rio de Janeiro</option><option value="MG">MG — Minas Gerais</option><option value="PR">PR — Paraná</option><option value="SC">SC — Santa Catarina</option><option value="RS">RS — Rio Grande do Sul</option><option value="GO">GO — Goiás</option><option value="DF">DF — Distrito Federal</option><option value="MT">MT — Mato Grosso</option><option value="MS">MS — Mato Grosso do Sul</option></select>
-        <div class="ms-hint">Clique para marcar um ou mais estados.</div>
+        <select id="fUf" multiple size="6" onchange="mudarUf()" onmousedown="msToggle(event)" style="display:none;"><option value="SP" selected>SP — São Paulo</option><option value="RJ">RJ — Rio de Janeiro</option><option value="MG">MG — Minas Gerais</option><option value="PR">PR — Paraná</option><option value="SC">SC — Santa Catarina</option><option value="RS">RS — Rio Grande do Sul</option><option value="GO">GO — Goiás</option><option value="DF">DF — Distrito Federal</option><option value="MT">MT — Mato Grosso</option><option value="MS">MS — Mato Grosso do Sul</option></select>
+        <input class="search" id="fUfSearch" placeholder="Digite o estado e clique para adicionar..." oninput="renderUfList()" style="margin-bottom:6px;">
+        <div class="mun-list" id="ufList" style="display:none;"></div>
+        <div class="chip-row" id="ufChips"></div>
+        <div class="ms-hint" id="ufHint">Digite para buscar e clique para adicionar.</div>
         <label>Município</label>
-        <input class="search" id="fMunSearch" placeholder="Filtrar cidade na lista..." oninput="filtrarMunOpts()" style="display:none;margin-bottom:6px;">
-        <select id="fMunicipio" multiple size="7" onmousedown="msToggle(event)"></select>
+        <input class="search" id="fMunSearch" placeholder="Digite a cidade e clique para adicionar..." oninput="renderMunList()" style="display:none;margin-bottom:6px;">
+        <div class="mun-list" id="munList" style="display:none;"></div>
+        <select id="fMunicipio" multiple size="7" onmousedown="msToggle(event)" style="display:none;"></select>
+        <div class="chip-row" id="munChips"></div>
         <input id="fMunicipioTxt" placeholder="Ex: Campinas..." style="display:none;">
-        <div class="hintline" id="munHint">Clique para marcar uma ou mais cidades.</div>
+        <div class="hintline" id="munHint">Digite para buscar e clique para adicionar.</div>
       </div>
     </div>
     <div class="acc" data-acc>
@@ -274,7 +300,12 @@
         <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="acc-body">
-        <input class="search" id="cnaeSearch" placeholder="Buscar ramo ou código..." oninput="renderCnaeList()" style="margin-top:8px;">
+        <div class="ai-cnae">
+          <input id="cnaeAI" placeholder="Descreva a atividade — a IA acha os CNAEs (ex: solda, embalagens...)" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCnaeIA();}">
+          <button type="button" class="ai-btn" onclick="buscarCnaeIA()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5L13 3z"/></svg>Buscar</button>
+        </div>
+        <div class="ai-hint" id="cnaeAIHint"></div>
+        <input class="search" id="cnaeSearch" placeholder="Ou busque por ramo/código..." oninput="cnaeRanked=null;$('cnaeAIHint').textContent='';renderCnaeList()" style="margin-top:8px;">
         <div class="chk-list" id="cnaeList"></div>
         <div class="chip-row" id="cnaeChips"></div>
         <input id="fCnaeTxt" placeholder="Ex: 5611 ou restaurante" style="display:none;">
@@ -355,6 +386,7 @@
         <div class="res-actions">
           <div class="view-toggle"><button class="vt on" id="vtCards" onclick="setView('cards')">Cards</button><button class="vt" id="vtTable" onclick="setView('table')">Tabela</button></div>
           <button class="btn btn-sm btn-excel" onclick="exportar('xlsx')">⬇ Excel</button>
+          <button class="btn btn-sm btn-google" onclick="exportarEnriquecido('xlsx')" title="Exporta o Excel e busca telefone no Google Meu Negócio para os leads sem telefone bom (sob demanda, custo por consulta; não armazena)"><svg viewBox="0 0 48 48" width="17" height="17" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Excel + Telefone Google</button>
           <button class="btn btn-sm btn-dash" onclick="exportar('html')">📊 Dashboard HTML</button>
           <button class="btn btn-sm btn-pdf" onclick="exportar('pdf')">📄 PDF</button>
           <button class="btn btn-sm btn-csv" onclick="exportar('csv')">CSV</button>
@@ -395,7 +427,7 @@ const PAGE=100, EXPORT_CAP=20000;
 let resultados=[], selecionados=new Set(), semContadores=false;
 let viewMode='cards', filtrosAplicados=null, buscaJaFeita=false;
 let offset=0, totalCount=null, currentQS='', loading=false, lastBatch=0, totalEhAprox=false;
-let BUSCAS=[], CNAES=[], cnaeSel=new Set(), refsCnaeOk=false, refsMunOk=false, modalRow=null, LOGO='';
+let BUSCAS=[], CNAES=[], cnaeSel=new Set(), refsCnaeOk=false, refsMunOk=false, modalRow=null, LOGO='', cnaeRanked=null;
 const supaAuth = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
 let usuario=null, accessToken=null, nuvemOk=false;
 function $(id){return document.getElementById(id);}
@@ -433,16 +465,112 @@ async function carregarReferencias(){
   else{$('cnaeSearch').style.display='none';$('cnaeList').style.display='none';$('cnaeChips').style.display='none';$('fCnaeTxt').style.display='block';$('cnaeSub').textContent='Digite código ou ramo';}
   await carregarMunicipios(msVals('fUf'));
   if(!refsMunOk){$('fMunicipio').style.display='none';if($('fMunSearch'))$('fMunSearch').style.display='none';$('fMunicipioTxt').style.display='block';$('munHint').textContent='Digite o começo do nome da cidade.';}
+  renderUf(); renderMun();
   try{const r=await fetch(SUPA_URL+'/rest/v1/situacoes?select=situacao,qtde&order=qtde.desc',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();if(d&&d.length){const sel=$('fSituacao');sel.innerHTML='';d.forEach(s=>{const o=document.createElement('option');o.value=s.situacao;o.textContent=s.situacao+' ('+nfmt(s.qtde)+')';sel.appendChild(o);});}}}catch(e){}
 }
 async function carregarMeta(){
   try{const r=await fetch(SUPA_URL+'/rest/v1/meta?select=chave,valor',{headers:{'apikey':SUPA_KEY}});if(!r.ok)return;const d=await r.json(),m={};d.forEach(x=>m[x.chave]=x.valor);const el=$('baseInfo');if(el&&m.base_data)el.innerHTML=' · atualizada em <b>'+dataBR(m.base_data)+'</b>'+(m.total?' ('+nfmt(parseInt(m.total))+' empresas)':'');}catch(e){}
 }
+var CNAE_EXPAND={
+  solda:['soldagem','caldeiraria','serralheria','estruturas metalicas','usinagem','metalurgica','metalurgia','metalmecanica','esquadrias metalicas','tornearia','estamparia','corte e dobra','ferro'],
+  metal:['metalurgica','metalurgia','usinagem','fundicao','solda','caldeiraria','serralheria','estruturas metalicas','estamparia','trefilacao','laminacao','forjaria','ferro'],
+  usinagem:['usinagem','tornearia','fresagem','solda','pecas','metalurgica','ferramentaria'],
+  papel:['papel','celulose','papelao','embalagem','cartonagem','artefatos de papel','grafica'],
+  embalagem:['embalagem','papelao','cartonagem','plastico','vidro','sacaria','rotulos','artefatos'],
+  plastico:['plastico','polimero','injecao','termoplastico','resina','pvc','fibra de vidro','material plastico'],
+  borracha:['borracha','pneu','artefatos de borracha','vulcanizacao'],
+  aliment:['alimentos','alimenticios','bebida','frigorifico','laticinios','padaria','panificacao','moagem','conservas','doces','massas','oleos','racoes'],
+  bebida:['bebida','refrigerante','cerveja','cervejaria','destilaria','vinho','agua','sucos'],
+  construc:['construcao','obras','edificacoes','empreiteira','incorporacao','alvenaria','concreto','terraplenagem','instalacoes','reforma','pavimentacao'],
+  eletric:['eletrica','eletronica','eletrotecnica','instalacoes eletricas','automacao','painel eletrico','material eletrico','iluminacao'],
+  madeira:['madeira','moveis','marcenaria','serraria','esquadrias de madeira','artefatos de madeira'],
+  movel:['moveis','marcenaria','madeira','estofados','colchoes'],
+  transport:['transporte','logistica','frete','rodoviario','carga','mudanca','entrega','armazenagem','encomendas'],
+  agro:['agricola','agropecuaria','pecuaria','fazenda','cultivo','graos','sementes','fertilizantes','defensivos','maquinas agricolas','irrigacao'],
+  pecuaria:['pecuaria','bovinos','aves','suinos','gado','frigorifico','laticinios','racoes'],
+  textil:['textil','confeccao','vestuario','malharia','tecido','costura','roupas','fiacao'],
+  vestuario:['vestuario','confeccao','roupas','malharia','moda','calcados','acessorios'],
+  quimic:['quimicos','tintas','vernizes','solventes','resinas','cosmeticos','produtos de limpeza','sabao','adesivos'],
+  tinta:['tintas','vernizes','pigmentos','revestimentos','pintura'],
+  saude:['saude','clinica','hospital','odontologia','laboratorio','farmacia','medicos','fisioterapia','diagnostico'],
+  farmacia:['farmacia','medicamentos','drogaria','farmaceuticos'],
+  tecnologia:['tecnologia','software','sistemas','informatica','desenvolvimento','dados','telecomunicacoes','aplicativos'],
+  telecom:['telecomunicacoes','telefonia','internet','provedor','redes','fibra optica'],
+  automot:['automotivo','veiculos','autopecas','oficina','funilaria','concessionaria','pecas','motores'],
+  oficina:['oficina','manutencao de veiculos','funilaria','autopecas','mecanica'],
+  limpeza:['limpeza','higiene','conservacao','saneamento','dedetizacao','asseio'],
+  seguranca:['seguranca','vigilancia','monitoramento','alarmes','cftv','portaria'],
+  comercio:['comercio','varejo','atacado','loja','distribuidora','revenda'],
+  atacado:['atacadista','distribuidora','distribuicao'],
+  varejo:['varejista','loja','comercio a varejo','revenda'],
+  educac:['educacao','ensino','escola','curso','treinamento','faculdade','creche'],
+  restaurante:['restaurante','lanchonete','alimentacao','bar','refeicoes','buffet'],
+  hotel:['hotel','pousada','hospedagem','turismo','motel'],
+  grafica:['grafica','impressao','serigrafia','editora','encadernacao'],
+  mineracao:['mineracao','extracao','minerio','pedreira','britamento','areia','brita'],
+  energia:['energia','eletrica','geracao','solar','fotovoltaica','usina'],
+  agua:['agua','saneamento','esgoto','tratamento de agua','pocos'],
+  vidro:['vidro','vidracaria','esquadrias','espelhos'],
+  couro:['couro','calcados','curtume','artefatos de couro'],
+  ceramica:['ceramica','porcelana','revestimentos ceramicos','pisos','azulejos','telhas','tijolos'],
+  maquinas:['maquinas','equipamentos','industrial','manutencao de maquinas','montagem'],
+  consultoria:['consultoria','assessoria','gestao','projetos'],
+  contabil:['contabilidade','contabeis','fiscal','tributaria'],
+  juridic:['juridica','advocacia','advogados','direito'],
+  imobiliaria:['imobiliaria','imoveis','corretagem','locacao']
+};
+function _reWord(t){return new RegExp('(^|[^A-Z0-9])'+String(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));}
+function cnaeExpandTerms(raw){
+  var out=[],seen={};
+  function add(t,w){t=norm(t);if(t.length>=3&&!seen[t]){seen[t]=1;out.push({t:t,w:w});}}
+  var words=norm(raw).split(/\s+/).filter(function(x){return x.length>=3;});
+  words.forEach(function(w){add(w,5);});
+  words.forEach(function(w){for(var key in CNAE_EXPAND){var nk=norm(key);if(w.indexOf(nk)>=0||nk.indexOf(w)>=0){CNAE_EXPAND[key].forEach(function(syn){add(syn,3);});}}});
+  return out;
+}
+async function buscarCnaeIA(){
+  if(!refsCnaeOk){if(typeof toast==='function')toast('Base de CNAE ainda carregando...');return;}
+  var raw=($('cnaeAI').value||'').trim();
+  if(!raw){cnaeRanked=null;$('cnaeAIHint').textContent='';renderCnaeList();return;}
+  $('cnaeAIHint').innerHTML='<span class="spin"></span> Consultando a IA...';
+  try{
+    var tk=(typeof accessToken!=='undefined'&&accessToken)?accessToken:SUPA_KEY;
+    var r=await fetch(SUPA_URL+'/functions/v1/cnae-ia',{method:'POST',headers:{'Authorization':'Bearer '+tk,'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({query:raw})});
+    var d=await r.json().catch(function(){return{};});
+    if(!r.ok)throw new Error(d.error||('HTTP '+r.status));
+    var byCode={};CNAES.forEach(function(c){byCode[c[0]]=c;});
+    cnaeRanked=(d.codigos||[]).map(String).map(function(c){return byCode[c];}).filter(Boolean);
+    $('cnaeSearch').value='';renderCnaeList();
+    $('cnaeAIHint').innerHTML=cnaeRanked.length?('✨ <b>'+cnaeRanked.length+'</b> CNAEs sugeridos pela IA para "'+esc(raw)+'" — marque os que fizerem sentido · <a href="#" onclick="limparCnaeIA();return false;">ver todos</a>'):('A IA não encontrou CNAEs para "'+esc(raw)+'". Tente descrever de outro jeito. · <a href="#" onclick="limparCnaeIA();return false;">ver todos</a>');
+  }catch(e){
+    buscarCnaeLocal(raw);
+    var h=$('cnaeAIHint');if(h)h.innerHTML='⚠️ IA indisponível — busca local. '+h.innerHTML;
+  }
+}
+function buscarCnaeLocal(raw){
+  if(!refsCnaeOk)return;
+  raw=(raw!=null?raw:($('cnaeAI').value||'')).trim();
+  if(!raw){cnaeRanked=null;$('cnaeAIHint').textContent='';renderCnaeList();return;}
+  var terms=cnaeExpandTerms(raw);terms.forEach(function(o){o.re=_reWord(o.t);});
+  var phrase=norm(raw),phraseRe=(phrase.length>=3?_reWord(phrase):null),scored=[];
+  for(var i=0;i<CNAES.length;i++){var c=CNAES[i],d=norm(c[1]),s=0;
+    if(phraseRe&&phraseRe.test(d))s+=10;
+    for(var j=0;j<terms.length;j++){if(terms[j].re.test(d))s+=terms[j].w;}
+    if(s>0)scored.push([s,c]);
+  }
+  scored.sort(function(a,b){return b[0]-a[0]||(b[1][2]-a[1][2]);});
+  cnaeRanked=scored.slice(0,80).map(function(x){return x[1];});
+  $('cnaeSearch').value='';
+  renderCnaeList();
+  $('cnaeAIHint').innerHTML=cnaeRanked.length?('<b>'+cnaeRanked.length+'</b> CNAEs (busca local) para "'+esc(raw)+'" — marque os que fizerem sentido · <a href="#" onclick="limparCnaeIA();return false;">ver todos</a>'):('Nada encontrado para "'+esc(raw)+'". · <a href="#" onclick="limparCnaeIA();return false;">ver todos</a>');
+}
+function limparCnaeIA(){cnaeRanked=null;if($('cnaeAI'))$('cnaeAI').value='';if($('cnaeAIHint'))$('cnaeAIHint').textContent='';renderCnaeList();}
 function renderCnaeList(){
-  if(!refsCnaeOk)return;const q=norm($('cnaeSearch').value||''),box=$('cnaeList');box.innerHTML='';let n=0;
-  for(const c of CNAES){
-    if(q && !(c[0].includes(q)||norm(c[1]).includes(q)))continue;
-    if(++n>150){const d=document.createElement('div');d.className='hintline';d.style.padding='6px';d.textContent='...refine a busca para ver mais';box.appendChild(d);break;}
+  if(!refsCnaeOk)return;const box=$('cnaeList');box.innerHTML='';
+  const ranked=cnaeRanked,q=ranked?'':norm($('cnaeSearch').value||''),source=ranked||CNAES,cap=ranked?80:150;let n=0;
+  for(const c of source){
+    if(!ranked && q && !(c[0].includes(q)||norm(c[1]).includes(q)))continue;
+    if(++n>cap){const d=document.createElement('div');d.className='hintline';d.style.padding='6px';d.textContent='...refine a busca para ver mais';box.appendChild(d);break;}
     const div=document.createElement('div');div.className='chk-item';
     div.innerHTML='<input type="checkbox" '+(cnaeSel.has(c[0])?'checked':'')+'><span><span class="cc">'+c[0]+'</span> <span class="cq">('+nfmt(c[2])+')</span><br>'+esc(c[1])+'</span>';
     div.onclick=(e)=>{if(e.target.tagName!=='INPUT'){const cb=div.querySelector('input');cb.checked=!cb.checked;}cnaeToggle(c[0],div.querySelector('input').checked);};
@@ -455,8 +583,15 @@ function msVals(id){return [...$(id).selectedOptions].map(o=>o.value).filter(Boo
 function setMs(id,val){const el=$(id);if(!el)return;const arr=Array.isArray(val)?val:(val!=null&&val!==''?[val]:[]);[...el.options].forEach(o=>{o.selected=arr.indexOf(o.value)>=0;});}
 function msToggle(e){const t=e.target;if(!t||t.tagName!=='OPTION')return;e.preventDefault();t.selected=!t.selected;const s=t.parentNode;if(s){s.focus();s.dispatchEvent(new Event('change',{bubbles:true}));}}
 function filtrarMunOpts(){const q=(($('fMunSearch').value)||'').toLowerCase();[...$('fMunicipio').options].forEach(o=>{o.style.display=(!q||o.textContent.toLowerCase().indexOf(q)>=0)?'':'none';});}
+function _accless(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+function renderUfChips(){const box=$('ufChips');if(!box)return;const sel=$('fUf');box.innerHTML='';[...sel.selectedOptions].forEach(o=>{const c=document.createElement('span');c.className='chip';c.innerHTML=esc(o.textContent)+' <b>×</b>';c.querySelector('b').onclick=()=>{o.selected=false;renderUfChips();mudarUf();};box.appendChild(c);});const n=sel.selectedOptions.length,h=$('ufHint');if(h)h.textContent=n?(n+' estado(s) selecionado(s)'):'Digite para buscar e clique para adicionar.';}
+function renderUfList(){const listBox=$('ufList');if(!listBox)return;const q=_accless(($('fUfSearch').value||'').trim());if(!q){listBox.innerHTML='';listBox.style.display='none';return;}const sel=$('fUf');const opts=[...sel.options].filter(o=>!o.selected&&(_accless(o.textContent).indexOf(q)>=0||_accless(o.value).indexOf(q)>=0)).slice(0,20);if(!opts.length){listBox.innerHTML='<div class="mun-empty">Nenhum estado encontrado</div>';listBox.style.display='block';return;}listBox.innerHTML='';opts.forEach(o=>{const d=document.createElement('div');d.className='mun-opt';d.textContent=o.textContent;d.onclick=()=>{o.selected=true;$('fUfSearch').value='';renderUfChips();renderUfList();mudarUf();};listBox.appendChild(d);});listBox.style.display='block';}
+function renderUf(){renderUfChips();renderUfList();}
+function renderMunChips(){const box=$('munChips');if(!box)return;const sel=$('fMunicipio');box.innerHTML='';[...sel.selectedOptions].forEach(o=>{const c=document.createElement('span');c.className='chip';c.innerHTML=esc(o.textContent)+' <b>×</b>';c.querySelector('b').onclick=()=>{o.selected=false;renderMunChips();};box.appendChild(c);});const n=sel.selectedOptions.length,h=$('munHint');if(h)h.textContent=n?(n+' cidade(s) selecionada(s)'):'Digite para buscar e clique para adicionar.';}
+function renderMunList(){const listBox=$('munList');if(!listBox)return;const q=_accless(($('fMunSearch').value||'').trim());if(!q){listBox.innerHTML='';listBox.style.display='none';return;}const sel=$('fMunicipio');const opts=[...sel.options].filter(o=>!o.selected&&_accless(o.textContent).indexOf(q)>=0).slice(0,60);if(!opts.length){listBox.innerHTML='<div class="mun-empty">Nenhuma cidade encontrada</div>';listBox.style.display='block';return;}listBox.innerHTML='';opts.forEach(o=>{const d=document.createElement('div');d.className='mun-opt';d.textContent=o.textContent;d.onclick=()=>{o.selected=true;$('fMunSearch').value='';renderMunChips();renderMunList();};listBox.appendChild(d);});listBox.style.display='block';}
+function renderMun(){renderMunChips();renderMunList();}
 function getFiltros(){return{busca:($('fBusca').value||'').trim(),cnpj:($('fCnpj').value||'').replace(/\D/g,''),uf:msVals('fUf'),municipio:refsMunOk?msVals('fMunicipio'):($('fMunicipioTxt').value||'').trim(),cnae:refsCnaeOk?[...cnaeSel]:($('fCnaeTxt').value||'').trim(),situacao:msVals('fSituacao'),tipo:msVals('fTipo'),simples:$('fSimples').value,mei:$('fMei').value,porte:msVals('fPorte'),capMin:$('fCapMin').value,capMax:$('fCapMax').value,abreDe:$('fAbreDe').value,abreAte:$('fAbreAte').value,semContadores};}
-async function setFiltros(f){$('fBusca').value=f.busca||'';$('fCnpj').value=f.cnpj||'';setMs('fUf',f.uf!=null?f.uf:'SP');if(refsMunOk){await carregarMunicipios(msVals('fUf'));setMs('fMunicipio',f.municipio);}else $('fMunicipioTxt').value=(typeof f.municipio==='string'?f.municipio:'')||'';if(refsCnaeOk){cnaeSel=new Set(Array.isArray(f.cnae)?f.cnae:[]);renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value=(typeof f.cnae==='string'?f.cnae:'')||'';setMs('fSituacao',f.situacao);setMs('fTipo',f.tipo);$('fSimples').value=f.simples||'';$('fMei').value=f.mei||'';setMs('fPorte',f.porte);$('fCapMin').value=f.capMin||'';$('fCapMax').value=f.capMax||'';$('fAbreDe').value=f.abreDe||'';$('fAbreAte').value=f.abreAte||'';semContadores=!!f.semContadores;$('tgContadores').classList.toggle('on',semContadores);$('tgState').textContent=semContadores?'Ativo':'Inativo';}
+async function setFiltros(f){$('fBusca').value=f.busca||'';$('fCnpj').value=f.cnpj||'';setMs('fUf',f.uf!=null?f.uf:'SP');if(refsMunOk){await carregarMunicipios(msVals('fUf'));setMs('fMunicipio',f.municipio);}else $('fMunicipioTxt').value=(typeof f.municipio==='string'?f.municipio:'')||'';if(refsCnaeOk){cnaeSel=new Set(Array.isArray(f.cnae)?f.cnae:[]);renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value=(typeof f.cnae==='string'?f.cnae:'')||'';setMs('fSituacao',f.situacao);setMs('fTipo',f.tipo);$('fSimples').value=f.simples||'';$('fMei').value=f.mei||'';setMs('fPorte',f.porte);$('fCapMin').value=f.capMin||'';$('fCapMax').value=f.capMax||'';$('fAbreDe').value=f.abreDe||'';$('fAbreAte').value=f.abreAte||'';semContadores=!!f.semContadores;$('tgContadores').classList.toggle('on',semContadores);$('tgState').textContent=semContadores?'Ativo':'Inativo';renderUf();renderMun();}
 function buildQuery(f){
   const p=[];
   if(f.uf&&f.uf.length)p.push('uf=in.('+f.uf.map(encodeURIComponent).join(',')+')');
@@ -479,7 +614,8 @@ function buildQuery(f){
 async function apiFetch(qs,from,to,withCount){
   const headers={'apikey':SUPA_KEY,'Range-Unit':'items','Range':from+'-'+to};
   if(withCount)headers['Prefer']='count=estimated';
-  const _ord=(qs&&qs.indexOf('imatch')>=0)?'':'&order=cnpj';const res=await fetch(REST+'?select=*'+_ord+(qs?'&'+qs:''),{headers});
+  /* SEM order=cnpj: ordenar forcava o Postgres a ler TODOS os matches antes de cortar 100 (timeout 57014 em estados/CNAEs de baixo volume). Sem order, ele para nas primeiras 100 via indice (uf,cnae_principal,cnpj). Resultados vem agrupados por atividade, deterministicos p/ paginacao. */
+  const res=await fetch(REST+'?select=*'+(qs?'&'+qs:''),{headers});
   if(!res.ok)throw new Error('HTTP '+res.status+' — '+(await res.text()).slice(0,180));
   const cr=res.headers.get('content-range')||'',tot=cr.split('/')[1];
   return{data:await res.json(),total:(tot&&tot!=='*')?parseInt(tot):null};
@@ -533,6 +669,60 @@ async function coletarRows(){
   toast('Preparando exportação...');let rows=[],from=0;
   while(from<EXPORT_CAP){const{data}=await apiFetch(currentQS,from,from+999,false);rows=rows.concat(data);from+=1000;if(data.length<1000)break;}
   return rows;
+}
+/* ===== Enriquecimento de telefone via Google Places (sob demanda, NAO armazena) ===== */
+var _DDDS_OK=new Set('11 12 13 14 15 16 17 18 19 21 22 24 27 28 31 32 33 34 35 37 38 41 42 43 44 45 46 47 48 49 51 53 54 55 61 62 63 64 65 66 67 68 69 71 73 74 75 77 79 81 82 83 84 85 86 87 88 89 91 92 93 94 95 96 97 98 99'.split(' '));
+var _MAX_ENRICH=3000;
+function _telDig(t){return String(t==null?'':t).replace(/\D/g,'');}
+function _telSuspeito(t){var d=_telDig(t);if(!d)return true;if(d.length<10||d.length>11)return true;var ddd=d.slice(0,2),loc=d.slice(2);if(!_DDDS_OK.has(ddd))return true;if(/^0/.test(loc))return true;if(/^(\d)\1+$/.test(loc))return true;return false;}
+function _telFormata(t){var d=_telDig(t);if(d.length<10||d.length>11)return String(t==null?'':t);var ddd=d.slice(0,2),loc=d.slice(2);if(loc.length===8&&/^[6-9]/.test(loc))loc='9'+loc;return loc.length===9?('('+ddd+') '+loc.slice(0,5)+'-'+loc.slice(5)):('('+ddd+') '+loc.slice(0,4)+'-'+loc.slice(4));}
+function _confPT(c){return({alta:'Alta',media:'Média',baixa:'Baixa',nao_encontrado:'Não encontrado',sem_telefone:'Sem telefone no Google',erro:'Erro na consulta',sem_nome:'Sem nome'})[c]||(c||'');}
+function _melhorTel(r){var g=r._tel_google||'',c=r._conf_google||'';if(g&&(c==='alta'||c==='media'))return g;return _telSuspeito(r.telefone)?(g||''):_telFormata(r.telefone);}
+function _contaTels(rows){var m={};rows.forEach(function(r){if(!_telSuspeito(r.telefone)){var d=_telDig(r.telefone);m[d]=(m[d]||0)+1;}});return m;}
+function _precisaEnriquecer(r,cnt){if(_telSuspeito(r.telefone))return true;var d=_telDig(r.telefone);return !!(cnt&&cnt[d]&&cnt[d]>=4);}
+function _prog(msg){var e=document.getElementById('_progBox');if(!e){e=document.createElement('div');e.id='_progBox';e.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99999;background:#111827;color:#fff;padding:20px 28px;border-radius:14px;font-size:14px;line-height:1.5;box-shadow:0 12px 48px rgba(0,0,0,.45);text-align:center;min-width:240px';document.body.appendChild(e);}e.innerHTML=msg;}
+function _progFim(){var e=document.getElementById('_progBox');if(e)e.remove();}
+async function _enrichLote(leads){var tk=(typeof accessToken!=='undefined'&&accessToken)?accessToken:SUPA_KEY;var r=await fetch(SUPA_URL+'/functions/v1/enrich-tel',{method:'POST',headers:{'Authorization':'Bearer '+tk,'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({leads:leads})});var d=await r.json().catch(function(){return{};});if(!r.ok)throw new Error(d.error||('HTTP '+r.status));return d.resultados||[];}
+async function enriquecerTelefones(rows,modo){
+  var cnt=_contaTels(rows);
+  var alvo=rows.filter(function(r){return modo==='todos'?true:_precisaEnriquecer(r,cnt);});
+  if(!alvo.length){toast('Todos os leads já têm telefone válido — nada a enriquecer.');return 0;}
+  if(alvo.length>_MAX_ENRICH){alert('Muitos leads para enriquecer de uma vez ('+nfmt(alvo.length)+'). Para controlar o custo, marque até '+nfmt(_MAX_ENRICH)+' empresas (caixinhas) ou refine os filtros e tente de novo.');return -1;}
+  var custo=(alvo.length*0.035).toFixed(2);
+  if(!confirm('Buscar telefone no Google Meu Negócio para '+nfmt(alvo.length)+' lead(s)'+(modo==='todos'?' (TODOS)':' sem telefone bom')+'.\n\nCusto estimado: ~US$ '+custo+' (1 consulta por lead).\nNada é armazenado — vai só para o seu Excel.\n\nContinuar?'))return -1;
+  var byId={};rows.forEach(function(r){byId[r.cnpj]=r;});
+  var BATCH=25,feito=0;
+  for(var i=0;i<alvo.length;i+=BATCH){
+    var slice=alvo.slice(i,i+BATCH).map(function(r){return{id:r.cnpj,nome:r.nome_fantasia||r.razao_social,municipio:r.municipio,uf:r.uf};});
+    _prog('<span class="spin"></span><br>Buscando telefone no Google...<br><b>'+Math.min(i+slice.length,alvo.length)+'</b> / '+nfmt(alvo.length));
+    var res;try{res=await _enrichLote(slice);}catch(e){_progFim();throw e;}
+    res.forEach(function(x){var r=byId[x.id];if(r){r._tel_google=x.telefone_google||'';r._conf_google=x.confianca||'';r._nome_google=x.nome_google||'';}});
+    feito+=slice.length;
+  }
+  _progFim();return feito;
+}
+async function exportarEnriquecido(fmt){
+  fmt=fmt||'xlsx';
+  if(!window.XLSX){toast('Componente de Excel ainda carregando, tente de novo.');return;}
+  if(!buscaJaFeita||(!resultados.length&&!selecionados.size)){toast('Aplique os filtros primeiro.');return;}
+  if(typeof accessToken==='undefined'||!accessToken){toast('Faça login para usar o enriquecimento.');return;}
+  clearError();
+  try{
+    var _tk=(accessToken||SUPA_KEY);
+    var _ck=await fetch(SUPA_URL+'/functions/v1/enrich-tel',{method:'POST',headers:{'Authorization':'Bearer '+_tk,'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({check:true})});
+    if(_ck.status===401){toast('Faça login para usar o enriquecimento.');return;}
+    var _cd=await _ck.json().catch(function(){return{};});
+    if(!_cd.configurado){showError('🔑 Enriquecimento pelo Google ainda não ativo: a chave do Google Meu Negócio não foi configurada no servidor. Assim que você providenciar a chave, o Claude ativa e este botão passa a funcionar.');return;}
+  }catch(e){showError('Não consegui verificar a configuração do Google Meu Negócio: '+String(e.message||e));return;}
+  var rows;try{rows=await coletarRows();}catch(e){showError(amigavel(e.message));return;}
+  if(!rows.length){toast('Nada para exportar.');return;}
+  var n;try{n=await enriquecerTelefones(rows,'faltantes');}catch(e){_progFim();var m=String(e.message||e);showError(/chave google/i.test(m)?'A chave do Google ainda não foi configurada no servidor — avise o Claude para ligá-la.':('Falha no enriquecimento: '+m));return;}
+  if(n===-1)return;
+  var arq='leads-maximos-tel-'+new Date().toISOString().slice(0,10).replace(/-/g,'');
+  var head=['CNPJ','Razão Social','Nome Fantasia','Município','UF','CNAE','Descrição CNAE','Situação','Tipo','Porte','Simples','MEI','Capital Social','Data Abertura','Telefone (base)','Telefone Google','Confiança Google','Nome no Google','Melhor Telefone','E-mail'];
+  var body=rows.map(function(e){return [fmtCnpj(e.cnpj),e.razao_social,e.nome_fantasia,e.municipio,e.uf,e.cnae_principal,e.cnae_desc,e.situacao,e.tipo,e.porte,e.simples?'Sim':'Não',e.mei?'Sim':'Não',e.capital_social,dataBR(e.data_abertura),e.telefone,e._tel_google||'',_confPT(e._conf_google),e._nome_google||'',_melhorTel(e),e.email];});
+  var ws=XLSX.utils.aoa_to_sheet([head].concat(body));ws['!cols']=[20,32,26,18,5,12,32,9,8,8,7,5,15,12,16,16,14,26,16,26].map(function(w){return{wch:w};});var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads');XLSX.writeFile(wb,arq+'.xlsx');
+  toast('✅ '+nfmt(rows.length)+' exportada(s) · '+nfmt(n||0)+' consultada(s) no Google.');
 }
 async function exportar(fmt){
   if(!buscaJaFeita||(!resultados.length&&!selecionados.size)){toast('Aplique os filtros primeiro.');return;}
@@ -619,9 +809,9 @@ async function excluirBusca(id){
 }
 function renderFolders(){const dl=$('folderList');dl.innerHTML='';[...new Set(BUSCAS.map(b=>b.pasta))].forEach(p=>{const o=document.createElement('option');o.value=p;dl.appendChild(o);});}
 function renderSaved(){const q=($('savedSearch').value||'').toLowerCase(),body=$('savedBody');body.innerHTML='';const list=BUSCAS.filter(b=>!q||b.nome.toLowerCase().includes(q)||b.pasta.toLowerCase().includes(q));if(!list.length){body.innerHTML='<div class="saved-empty">'+(BUSCAS.length?'Nenhuma corresponde.':'Nenhuma busca salva ainda. Monte os filtros e clique em “Salvar busca”.')+'</div>';return;}[...new Set(list.map(b=>b.pasta))].forEach(p=>{const g=document.createElement('div');g.innerHTML='<div class="folder-name">📁 '+esc(p)+'</div>';list.filter(b=>b.pasta===p).forEach(b=>{const it=document.createElement('div');it.className='saved-item';it.innerHTML='<div class="si-main"><div class="si-name">'+esc(b.nome)+'</div><div class="si-date">'+b.data+'</div><div class="si-chips">'+b.resumo.map(c=>'<span class="mini-chip">'+esc(c)+'</span>').join('')+'</div></div><div class="si-actions"><button class="btn btn-mini btn-apply-mini" onclick="aplicarBusca(\''+b.id+'\')">Aplicar</button><button class="btn btn-mini btn-del" onclick="excluirBusca(\''+b.id+'\')">🗑</button></div>';g.appendChild(it);});body.appendChild(g);});}
-function limpar(){['fBusca','fCnpj','fCapMin','fCapMax','fAbreDe','fAbreAte','fSimples','fMei'].forEach(id=>$(id).value='');setMs('fUf','SP');setMs('fSituacao',[]);setMs('fTipo',[]);setMs('fPorte',[]);if(!refsMunOk)$('fMunicipioTxt').value='';if(refsCnaeOk){cnaeSel.clear();renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value='';$('cnaeSearch').value='';if($('fMunSearch'))$('fMunSearch').value='';if(semContadores)toggleContadores();carregarMunicipios(['SP']).then(function(){filtrar();});}
-async function carregarMunicipios(ufs){const sel=$('fMunicipio');sel.innerHTML='';sel.style.display='';$('fMunicipioTxt').style.display='none';if($('fMunSearch'))$('fMunSearch').style.display='';refsMunOk=true;const list=Array.isArray(ufs)?ufs:(ufs?[ufs]:[]);if(!list.length)return;try{const r=await fetch(SUPA_URL+'/rest/v1/municipios?select=uf,municipio&uf=in.('+list.map(encodeURIComponent).join(',')+')&order=municipio',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();d.forEach(m=>{const o=document.createElement('option');o.value=m.municipio;o.textContent=list.length>1?(m.municipio+' — '+m.uf):m.municipio;sel.appendChild(o);});}}catch(e){}}
-function mudarUf(){const cur=msVals('fMunicipio');carregarMunicipios(msVals('fUf')).then(function(){setMs('fMunicipio',cur);});}
+function limpar(){['fBusca','fCnpj','fCapMin','fCapMax','fAbreDe','fAbreAte','fSimples','fMei'].forEach(id=>$(id).value='');setMs('fUf','SP');setMs('fSituacao',[]);setMs('fTipo',[]);setMs('fPorte',[]);if(!refsMunOk)$('fMunicipioTxt').value='';cnaeRanked=null;if($('cnaeAI'))$('cnaeAI').value='';if($('cnaeAIHint'))$('cnaeAIHint').textContent='';if(refsCnaeOk){cnaeSel.clear();renderCnaeChips();renderCnaeList();}else $('fCnaeTxt').value='';$('cnaeSearch').value='';if($('fMunSearch'))$('fMunSearch').value='';if(semContadores)toggleContadores();carregarMunicipios(['SP']).then(function(){renderUf();filtrar();});}
+async function carregarMunicipios(ufs){const sel=$('fMunicipio');sel.innerHTML='';sel.style.display='none';$('fMunicipioTxt').style.display='none';if($('fMunSearch'))$('fMunSearch').style.display='';refsMunOk=true;const list=Array.isArray(ufs)?ufs:(ufs?[ufs]:[]);if(!list.length){renderMun();return;}try{const r=await fetch(SUPA_URL+'/rest/v1/municipios?select=uf,municipio&uf=in.('+list.map(encodeURIComponent).join(',')+')&order=municipio',{headers:{'apikey':SUPA_KEY}});if(r.ok){const d=await r.json();d.forEach(m=>{const o=document.createElement('option');o.value=m.municipio;o.textContent=list.length>1?(m.municipio+' — '+m.uf):m.municipio;sel.appendChild(o);});}}catch(e){}renderMun();}
+function mudarUf(){const cur=msVals('fMunicipio');carregarMunicipios(msVals('fUf')).then(function(){setMs('fMunicipio',cur);renderMun();});}
 let jaIniciou=false;
 async function iniciar(){
   if(jaIniciou)return;jaIniciou=true;
