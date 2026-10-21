@@ -423,6 +423,7 @@
 const SUPA_URL='https://crlirvufkbykywkxdqsa.supabase.co';
 const SUPA_KEY='sb_publishable_i9c0T5PfVKMOg1GlY_Qzdg_t06faOG0';
 const REST=SUPA_URL+'/rest/v1/empresas';
+const FN_BUSCA=SUPA_URL+'/functions/v1/buscar-empresas';
 const PAGE=100, EXPORT_CAP=20000;
 let resultados=[], selecionados=new Set(), semContadores=false;
 let viewMode='cards', filtrosAplicados=null, buscaJaFeita=false;
@@ -615,7 +616,7 @@ async function apiFetch(qs,from,to,withCount){
   const headers={'apikey':SUPA_KEY,'Range-Unit':'items','Range':from+'-'+to};
   if(withCount)headers['Prefer']='count=estimated';
   /* SEM order=cnpj: ordenar forcava o Postgres a ler TODOS os matches antes de cortar 100 (timeout 57014 em estados/CNAEs de baixo volume). Sem order, ele para nas primeiras 100 via indice (uf,cnae_principal,cnpj). Resultados vem agrupados por atividade, deterministicos p/ paginacao. */
-  const res=await fetch(REST+'?select=*'+(qs?'&'+qs:''),{headers});
+  const res=await fetch(FN_BUSCA+'?select=*'+(qs?'&'+qs:''),{headers});
   if(!res.ok)throw new Error('HTTP '+res.status+' — '+(await res.text()).slice(0,180));
   const cr=res.headers.get('content-range')||'',tot=cr.split('/')[1];
   return{data:await res.json(),total:(tot&&tot!=='*')?parseInt(tot):null};
